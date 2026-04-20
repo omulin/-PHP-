@@ -28,7 +28,29 @@ export default function BoardCard({ tasks, onChangeStatus }) {
 
   return (
     <Card style={{ minHeight: 470 }}>
-      <SectionTitle>ボード</SectionTitle>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginBottom: 14,
+        }}
+      >
+        <SectionTitle>ボード</SectionTitle>
+
+        <button
+          style={{
+            border: "1px solid #d1d5db",
+            background: "#ffffff",
+            borderRadius: 10,
+            padding: "10px 14px",
+            fontWeight: 700,
+            cursor: "pointer",
+          }}
+        >
+          絞り込み
+        </button>
+      </div>
 
       <label
         style={{
