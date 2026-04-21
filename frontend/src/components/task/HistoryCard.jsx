@@ -34,15 +34,15 @@ export default function HistoryCard({ tasks }) {
         </select>
 
         <FilterChip active>全件 (2)</FilterChip>
-        <FilterChip active={false}>今日 (0)</FilterChip>
-        <FilterChip active={false}>今週 (2)</FilterChip>
-        <FilterChip active={false}>今月 (1)</FilterChip>
+        <FilterChip>今日 (0)</FilterChip>
+        <FilterChip>今週 (2)</FilterChip>
+        <FilterChip>今月 (1)</FilterChip>
       </div>
 
       <div style={{ display: "grid", gap: 14 }}>
         {historyTasks.map((task) => (
           <div
-            key={`history-${task.id}`}
+            key={task.id}
             style={{
               background: "#f1f5f9",
               borderRadius: 14,
@@ -54,39 +54,31 @@ export default function HistoryCard({ tasks }) {
             }}
           >
             <div>
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 10,
-                  marginBottom: 6,
-                  flexWrap: "wrap",
-                }}
-              >
-                <div style={{ fontWeight: 900, fontSize: 28 }}>{task.title}</div>
-                <div
-                  style={{
-                    background: "#d1fae5",
-                    color: "#047857",
-                    borderRadius: 999,
-                    padding: "4px 10px",
-                    fontWeight: 800,
-                    fontSize: 14,
-                  }}
-                >
-                  完了
-                </div>
+              <div style={{ fontWeight: 900, fontSize: 28 }}>
+                {task.title}
               </div>
 
-              <div style={{ color: "#6b7280", fontSize: 15, lineHeight: 1.7 }}>
-  期間: {formatDateRange(task.startDate, task.endDate)}<br />
-  作成: {task.createdBy}<br />
-  担当: {task.assignee}<br />
-  完了: {task.assignee}
-</div>
+              <div
+                style={{
+                  color: "#6b7280",
+                  fontSize: 15,
+                  lineHeight: 1.7,
+                }}
+              >
+                期間: {formatDateRange(task.startDate, task.endDate)}<br />
+                作成: {task.createdBy}<br />
+                担当: {task.assignee}<br />
+                完了: {task.assignee}
+              </div>
             </div>
 
-            <div style={{ color: "#6b7280", fontSize: 16, fontWeight: 700 }}>
+            <div
+              style={{
+                color: "#6b7280",
+                fontSize: 16,
+                fontWeight: 700,
+              }}
+            >
               {task.completedAt || "-"}
             </div>
           </div>

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import Login from "./components/old/Login";
+import Login from "./components/Login";
 import { initialTasks } from "./data/dummyTasks";
 import MainLayout from "./components/layout/MainLayout";
 import LeftPanel from "./components/layout/LeftPanel";
