@@ -34,6 +34,8 @@ export default function BoardCard({ tasks, onChangeStatus }) {
           justifyContent: "space-between",
           alignItems: "center",
           marginBottom: 14,
+          gap: 10,
+          flexWrap: "wrap",
         }}
       >
         <SectionTitle>ボード</SectionTitle>
@@ -43,8 +45,9 @@ export default function BoardCard({ tasks, onChangeStatus }) {
             border: "1px solid #d1d5db",
             background: "#ffffff",
             borderRadius: 10,
-            padding: "10px 14px",
+            padding: "8px 12px",
             fontWeight: 700,
+            fontSize: 13,
             cursor: "pointer",
           }}
         >
@@ -57,7 +60,7 @@ export default function BoardCard({ tasks, onChangeStatus }) {
           display: "flex",
           alignItems: "center",
           gap: 8,
-          fontSize: 15,
+          fontSize: 14,
           color: "#374151",
           marginBottom: 14,
         }}
@@ -79,17 +82,20 @@ export default function BoardCard({ tasks, onChangeStatus }) {
           <div
             key={column.key}
             style={{
-              background: "#eef2f7",
-              borderRadius: 14,
-              padding: 12,
+              background: "#f8fafc",
+              border: "1px solid #e5e7eb",
+              borderRadius: 12,
+              padding: 10,
               minHeight: 300,
             }}
           >
             <div
               style={{
-                fontWeight: 900,
-                fontSize: 24,
+                fontWeight: 800,
+                fontSize: 18,
+                color: "#111827",
                 marginBottom: 10,
+                lineHeight: 1.3,
               }}
             >
               {column.title}

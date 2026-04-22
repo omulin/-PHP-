@@ -16,17 +16,17 @@ export default function HistoryCard({ tasks }) {
           gap: 10,
           alignItems: "center",
           flexWrap: "wrap",
-          marginBottom: 18,
+          marginBottom: 16,
         }}
       >
         <select
           style={{
             minWidth: 220,
-            padding: "12px 14px",
+            padding: "10px 12px",
             borderRadius: 12,
             border: "1px solid #d1d5db",
             background: "#ffffff",
-            fontSize: 15,
+            fontSize: 14,
           }}
         >
           <option>全員</option>
@@ -39,35 +39,47 @@ export default function HistoryCard({ tasks }) {
         <FilterChip>今月 (1)</FilterChip>
       </div>
 
-      <div style={{ display: "grid", gap: 14 }}>
+      <div style={{ display: "grid", gap: 10 }}>
         {historyTasks.map((task) => (
           <div
             key={task.id}
             style={{
-              background: "#f1f5f9",
+              background: "#ffffff",
+              border: "1px solid #e5e7eb",
               borderRadius: 14,
-              padding: 16,
+              padding: "14px 16px",
               display: "grid",
               gridTemplateColumns: "1fr auto",
               gap: 12,
-              alignItems: "center",
+              alignItems: "start",
             }}
           >
             <div>
-              <div style={{ fontWeight: 900, fontSize: 28 }}>
+              <div
+                style={{
+                  fontWeight: 800,
+                  fontSize: 17,
+                  color: "#111827",
+                  lineHeight: 1.35,
+                  marginBottom: 6,
+                }}
+              >
                 {task.title}
               </div>
 
               <div
                 style={{
                   color: "#6b7280",
-                  fontSize: 15,
-                  lineHeight: 1.7,
+                  fontSize: 13,
+                  lineHeight: 1.65,
                 }}
               >
-                期間: {formatDateRange(task.startDate, task.endDate)}<br />
-                作成: {task.createdBy}<br />
-                担当: {task.assignee}<br />
+                期間: {formatDateRange(task.startDate, task.endDate)}
+                <br />
+                作成: {task.createdBy}
+                <br />
+                担当: {task.assignee}
+                <br />
                 完了: {task.assignee}
               </div>
             </div>
@@ -75,8 +87,11 @@ export default function HistoryCard({ tasks }) {
             <div
               style={{
                 color: "#6b7280",
-                fontSize: 16,
+                fontSize: 12,
                 fontWeight: 700,
+                whiteSpace: "nowrap",
+                alignSelf: "start",
+                paddingTop: 2,
               }}
             >
               {task.completedAt || "-"}

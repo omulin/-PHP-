@@ -28,18 +28,22 @@ export default function TodayTasksCard({ tasks, onChangeStatus }) {
           <div
             key={`today-${task.id}`}
             style={{
-              background: "#f8fafc",
-              borderRadius: 14,
+              background: "#ffffff",
+              border: "1px solid #e5e7eb",
+              borderRadius: 12,
               padding: 12,
-              borderLeft: "6px solid #3b82f6",
-              marginBottom: 12,
+              borderLeft: "4px solid #2563eb",
+              marginBottom: 10,
             }}
           >
             <div
               style={{
                 fontWeight: 800,
-                fontSize: 28,
-                marginBottom: 10,
+                fontSize: 18,
+                lineHeight: 1.35,
+                color: "#111827",
+                marginBottom: 8,
+                wordBreak: "break-word",
               }}
             >
               {task.title}
@@ -50,11 +54,12 @@ export default function TodayTasksCard({ tasks, onChangeStatus }) {
               onChange={(e) => onChangeStatus(task.id, e.target.value)}
               style={{
                 width: "100%",
-                padding: "10px 12px",
-                borderRadius: 12,
+                padding: "9px 10px",
+                borderRadius: 10,
                 border: "1px solid #d1d5db",
                 background: "#ffffff",
-                fontSize: 15,
+                fontSize: 13,
+                boxSizing: "border-box",
               }}
             >
               <option value="TODO">未入力</option>

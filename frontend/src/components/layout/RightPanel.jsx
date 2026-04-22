@@ -12,10 +12,11 @@ export default function RightPanel({ tasks }) {
 
       <div
         style={{
-          fontSize: 38,
+          fontSize: 32,
           fontWeight: 900,
           color: "#111827",
           marginBottom: 10,
+          lineHeight: 1,
         }}
       >
         {progress}%
@@ -35,17 +36,73 @@ export default function RightPanel({ tasks }) {
           style={{
             width: `${progress}%`,
             height: "100%",
-            background: "#4f8fe7",
+            background: "#2563eb",
           }}
         />
       </div>
 
-      <div style={{ fontSize: 17, lineHeight: 1.8 }}>
-        <div>未入力 {counts.todo}</div>
-        <div>進行中 {counts.doing}</div>
-        <div>完了 {counts.done}</div>
-        <div>今日完了 0</div>
-        <div>今月完了 1</div>
+      <div style={{ display: "grid", gap: 10 }}>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            fontSize: 14,
+            color: "#374151",
+          }}
+        >
+          <span>未入力</span>
+          <strong>{counts.todo}</strong>
+        </div>
+
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            fontSize: 14,
+            color: "#374151",
+          }}
+        >
+          <span>進行中</span>
+          <strong>{counts.doing}</strong>
+        </div>
+
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            fontSize: 14,
+            color: "#374151",
+          }}
+        >
+          <span>完了</span>
+          <strong>{counts.done}</strong>
+        </div>
+
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            fontSize: 14,
+            color: "#6b7280",
+            paddingTop: 6,
+            borderTop: "1px solid #e5e7eb",
+          }}
+        >
+          <span>今日完了</span>
+          <strong>0</strong>
+        </div>
+
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            fontSize: 14,
+            color: "#6b7280",
+          }}
+        >
+          <span>今月完了</span>
+          <strong>1</strong>
+        </div>
       </div>
     </Card>
   );
