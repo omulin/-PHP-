@@ -13,6 +13,8 @@ import ScheduleCard from "./components/schedule/ScheduleCard";
 export default function App() {
   const [isLogin, setIsLogin] = useState(false);
   const [tasks, setTasks] = useState(initialTasks);
+  const [editingTask, setEditingTask] = useState(null);
+  const [searchText, setSearchText] = useState("");
 
   const handleStatusChange = (id, nextStatus) => {
     setTasks((prev) =>
@@ -48,6 +50,58 @@ export default function App() {
     ]);
   };
 
+  const handleStartEdit = (task) => {
+    setEditingTask(task);
+  };
+
+  const handleCancelEdit = () => {
+    setEditingTask(null);
+  };
+
+  const handleUpdateTask = ({ id, title, label, startDate, endDate }) => {
+    setTasks((prev) =>
+      prev.map((task) =>
+        task.id === id
+          ? {
+              ...task,
+              title,
+              label,
+              startDate,
+              endDate,
+            }
+          : task
+      )
+    );
+
+    setEditingTask(null);
+  };
+
+  const handleDeleteTask = (id) => {
+    setTasks((prev) => prev.filter((task) => task.id !== id));
+
+    if (editingTask && editingTask.id === id) {
+      setEditingTask(null);
+    }
+  };
+
+  const keyword = searchText.trim().toLowerCase();
+
+  const filteredTasks = tasks.filter((task) => {
+    if (!keyword) return true;
+
+    return [
+      task.title,
+      task.label,
+      task.assignee,
+      task.createdBy,
+      task.status,
+      task.startDate,
+      task.endDate,
+    ].some((value) =>
+      String(value || "").toLowerCase().includes(keyword)
+    );
+  });
+
   if (!isLogin) {
     return <Login onLogin={() => setIsLogin(true)} />;
   }
@@ -65,16 +119,36 @@ export default function App() {
     >
       <MainLayout
         leftTop={<LeftPanel />}
-        centerTop={<TaskManagerCard onAddTask={handleAddTask} />}
+        centerTop={
+          <TaskManagerCard
+            onAddTask={handleAddTask}
+            onUpdateTask={handleUpdateTask}
+            editingTask={editingTask}
+            onCancelEdit={handleCancelEdit}
+            searchText={searchText}
+            onSearchTextChange={setSearchText}
+            resultCount={filteredTasks.length}
+          />
+        }
         rightTop={<RightPanel tasks={tasks} />}
         leftMiddle={
-          <TodayTasksCard tasks={tasks} onChangeStatus={handleStatusChange} />
+          <TodayTasksCard
+            tasks={filteredTasks}
+            onChangeStatus={handleStatusChange}
+            onEditTask={handleStartEdit}
+            onDeleteTask={handleDeleteTask}
+          />
         }
         centerMiddle={
-          <BoardCard tasks={tasks} onChangeStatus={handleStatusChange} />
+          <BoardCard
+            tasks={filteredTasks}
+            onChangeStatus={handleStatusChange}
+            onEditTask={handleStartEdit}
+            onDeleteTask={handleDeleteTask}
+          />
         }
         rightMiddle={<ScheduleCard />}
-        bottom={<HistoryCard tasks={tasks} />}
+        bottom={<HistoryCard tasks={filteredTasks} />}
       />
     </div>
   );

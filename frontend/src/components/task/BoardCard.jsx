@@ -3,7 +3,12 @@ import SectionTitle from "../common/SectionTitle";
 import TaskBox from "./TaskBox";
 import { STATUS_LABELS } from "../../data/dummyTasks";
 
-export default function BoardCard({ tasks, onChangeStatus }) {
+export default function BoardCard({
+  tasks,
+  onChangeStatus,
+  onEditTask,
+  onDeleteTask,
+}) {
   const todoTasks = tasks.filter((t) => t.status === "TODO");
   const doingTasks = tasks.filter((t) => t.status === "DOING");
   const doneTasks = tasks.filter((t) => t.status === "DONE");
@@ -106,6 +111,8 @@ export default function BoardCard({ tasks, onChangeStatus }) {
                 key={task.id}
                 task={task}
                 onChangeStatus={onChangeStatus}
+                onEditTask={onEditTask}
+                onDeleteTask={onDeleteTask}
               />
             ))}
           </div>

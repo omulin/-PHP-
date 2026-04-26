@@ -1,6 +1,11 @@
 import { STATUS_COLORS, STATUS_LABELS } from "../../data/dummyTasks";
 
-export default function TaskBox({ task, onChangeStatus }) {
+export default function TaskBox({
+  task,
+  onChangeStatus,
+  onEditTask,
+  onDeleteTask,
+}) {
   return (
     <div
       style={{
@@ -52,6 +57,49 @@ export default function TaskBox({ task, onChangeStatus }) {
         <option value="DOING">{STATUS_LABELS.DOING}</option>
         <option value="DONE">{STATUS_LABELS.DONE}</option>
       </select>
+
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "1fr 1fr",
+          gap: 8,
+          marginTop: 8,
+        }}
+      >
+        <button
+          type="button"
+          onClick={() => onEditTask(task)}
+          style={{
+            border: "1px solid #d1d5db",
+            background: "#ffffff",
+            borderRadius: 10,
+            padding: "8px 10px",
+            fontWeight: 700,
+            fontSize: 13,
+            cursor: "pointer",
+            color: "#374151",
+          }}
+        >
+          編集
+        </button>
+
+        <button
+          type="button"
+          onClick={() => onDeleteTask(task.id)}
+          style={{
+            border: "1px solid #fecaca",
+            background: "#fef2f2",
+            borderRadius: 10,
+            padding: "8px 10px",
+            fontWeight: 700,
+            fontSize: 13,
+            cursor: "pointer",
+            color: "#b91c1c",
+          }}
+        >
+          削除
+        </button>
+      </div>
     </div>
   );
 }
