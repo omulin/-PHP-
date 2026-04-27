@@ -1,22 +1,27 @@
-export function getStatusCounts(tasks) {
+export function getProgress(tasks = []) {
+  if (!tasks.length) return 0;
+
+  const doneCount = tasks.filter((task) => task.status === "DONE").length;
+
+  return Math.round((doneCount / tasks.length) * 100);
+}
+
+export function getStatusCounts(tasks = []) {
   return {
-    todo: tasks.filter((t) => t.status === "TODO").length,
-    doing: tasks.filter((t) => t.status === "DOING").length,
-    done: tasks.filter((t) => t.status === "DONE").length,
+    todo: tasks.filter((task) => task.status === "TODO").length,
+    doing: tasks.filter((task) => task.status === "DOING").length,
+    done: tasks.filter((task) => task.status === "DONE").length,
   };
 }
 
-export function getProgress(tasks) {
-  if (tasks.length === 0) return 0;
-  const done = tasks.filter((t) => t.status === "DONE").length;
-  return Math.round((done / tasks.length) * 100);
+export function getDoneTasks(tasks = []) {
+  return tasks.filter((task) => task.status === "DONE");
 }
 
-export function getDoneTasks(tasks) {
-  return tasks.filter((t) => t.status === "DONE");
-}
+export function formatDateRange(startDate, endDate) {
+  if (!startDate && !endDate) return "-";
+  if (!startDate) return endDate;
+  if (!endDate) return startDate;
 
-export function formatDateRange(start, end) {
-  if (!start || !end) return "-";
-  return `${start}〜${end}`;
+  return `${startDate} 〜 ${endDate}`;
 }

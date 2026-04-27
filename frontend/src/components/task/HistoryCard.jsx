@@ -33,10 +33,10 @@ export default function HistoryCard({ tasks }) {
           <option>朝倉悠翔</option>
         </select>
 
-        <FilterChip active>全件 (2)</FilterChip>
+        <FilterChip active>全件 ({historyTasks.length})</FilterChip>
         <FilterChip>今日 (0)</FilterChip>
-        <FilterChip>今週 (2)</FilterChip>
-        <FilterChip>今月 (1)</FilterChip>
+        <FilterChip>今週 ({historyTasks.length})</FilterChip>
+        <FilterChip>今月 ({historyTasks.length})</FilterChip>
       </div>
 
       <div style={{ display: "grid", gap: 10 }}>

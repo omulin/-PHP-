@@ -1,3 +1,15 @@
+export const STATUS_LABELS = {
+  TODO: "未入力",
+  DOING: "進行中",
+  DONE: "完了",
+};
+
+export const STATUS_COLORS = {
+  TODO: "#6366f1",
+  DOING: "#2563eb",
+  DONE: "#16a34a",
+};
+
 export const initialTasks = [
   {
     id: 1234645,
@@ -26,33 +38,10 @@ export const initialTasks = [
     title: "112233",
     label: "1234",
     status: "DONE",
-    startDate: "2025-03-25",
-    endDate: "2025-03-31",
+    startDate: "2025-03-28",
+    endDate: "2025-04-01",
     createdBy: "朝倉悠翔",
     assignee: "朝倉悠翔",
     completedAt: "2025-04-01 21:03",
   },
-  {
-    id: 112234,
-    title: "112233",
-    label: "1234",
-    status: "DONE",
-    startDate: "2025-03-30",
-    endDate: "2025-04-11",
-    createdBy: "朝倉悠翔",
-    assignee: "朝倉悠翔",
-    completedAt: "2025-03-31 17:34",
-  },
 ];
-
-export const STATUS_LABELS = {
-  TODO: "未入力",
-  DOING: "進行中",
-  DONE: "完了",
-};
-
-export const STATUS_COLORS = {
-  TODO: "#22c55e",
-  DOING: "#3b82f6",
-  DONE: "#3b82f6",
-};
