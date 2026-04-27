@@ -196,12 +196,7 @@ export default function App() {
             borderRadius: 12,
             fontSize: 14,
             fontWeight: 700,
-            boxShadow: "0 8px 24px rgba(0, 0={{
-            position: "fixed",
-            top: 20,
-            right: 20,
-            zIndex: 9999,
-            padding: "12, 0, 0.18)",
+            boxShadow: "0 8px 24px rgba(0, 0, 0, 0.18)",
             color: "#ffffff",
             background:
               toast.type === "add"
@@ -247,7 +242,7 @@ export default function App() {
             onDeleteTask={handleDeleteTask}
           />
         }
-        rightMiddle={<ScheduleCard />}
+        rightMiddle={<ScheduleCard tasks={filteredTasks} />}
         bottom={<HistoryCard tasks={filteredTasks} />}
       />
     </div>
