@@ -5,10 +5,10 @@ export default function SmallTab({ active, children, onClick }) {
       onClick={onClick}
       style={{
         border: active ? "1px solid #93c5fd" : "1px solid #d1d5db",
-        borderRadius: 10,
-        padding: "8px 12px",
+        borderRadius: 9,
+        padding: "6px 10px",
         fontWeight: 700,
-        fontSize: 13,
+        fontSize: 12,
         lineHeight: 1.2,
         cursor: "pointer",
         background: active ? "#dbeafe" : "#ffffff",

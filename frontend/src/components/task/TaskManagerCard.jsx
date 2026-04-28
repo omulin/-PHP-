@@ -8,9 +8,6 @@ export default function TaskManagerCard({
   onUpdateTask,
   editingTask,
   onCancelEdit,
-  searchText,
-  onSearchTextChange,
-  resultCount,
 }) {
   const [title, setTitle] = useState("");
   const [startDate, setStartDate] = useState("");
@@ -68,23 +65,23 @@ export default function TaskManagerCard({
     maxWidth: "100%",
     minWidth: 0,
     boxSizing: "border-box",
-    padding: "14px 12px",
-    borderRadius: 12,
+    padding: "11px 10px",
+    borderRadius: 10,
     border: "1px solid #d1d5db",
-    fontSize: 14,
+    fontSize: 13,
     background: "#ffffff",
     color: "#111827",
   };
 
   return (
-    <Card>
+    <Card style={{ padding: 12 }}>
       <SectionTitle>タスク管理</SectionTitle>
 
       <div
         style={{
           display: "flex",
           gap: 8,
-          marginBottom: 12,
+          marginBottom: 10,
           flexWrap: "wrap",
         }}
       >
@@ -92,8 +89,8 @@ export default function TaskManagerCard({
         <SmallTab active={!!editingTask}>編集</SmallTab>
       </div>
 
-      <div style={{ color: "#6b7280", marginBottom: 8, fontSize: 14 }}>
-        {editingTask ? "選択中のタスクを編集しています" : "全体タスク表示"}
+      <div style={{ color: "#6b7280", marginBottom: 8, fontSize: 13 }}>
+        {editingTask ? "選択中のタスクを編集しています" : "新しいタスクを追加します"}
       </div>
 
       <div
@@ -104,65 +101,17 @@ export default function TaskManagerCard({
           padding: "6px 10px",
           borderRadius: 999,
           fontWeight: 700,
-          marginBottom: 14,
-          fontSize: 13,
+          marginBottom: 12,
+          fontSize: 12,
         }}
       >
-        {editingTask ? "編集中" : "管理モード"}
+        {editingTask ? "編集中" : "入力モード"}
       </div>
 
       <div
         style={{
           display: "grid",
           gap: 10,
-          marginBottom: 14,
-        }}
-      >
-        <input
-          value={searchText}
-          onChange={(e) => onSearchTextChange(e.target.value)}
-          placeholder="検索（タスク名 / ラベル / 担当者 / 日付）"
-          style={inputStyle}
-        />
-
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            gap: 10,
-            flexWrap: "wrap",
-          }}
-        >
-          <div style={{ fontSize: 13, color: "#6b7280" }}>
-            検索結果: {resultCount}件
-          </div>
-
-          {searchText && (
-            <button
-              type="button"
-              onClick={() => onSearchTextChange("")}
-              style={{
-                border: "1px solid #d1d5db",
-                background: "#ffffff",
-                borderRadius: 10,
-                padding: "8px 12px",
-                fontWeight: 700,
-                fontSize: 13,
-                cursor: "pointer",
-                color: "#374151",
-              }}
-            >
-              検索クリア
-            </button>
-          )}
-        </div>
-      </div>
-
-      <div
-        style={{
-          display: "grid",
-          gap: 12,
           width: "100%",
           minWidth: 0,
         }}
@@ -177,8 +126,8 @@ export default function TaskManagerCard({
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "minmax(0, 1fr) 30px minmax(0, 1fr)",
-            gap: 10,
+            gridTemplateColumns: "minmax(0, 1fr) 24px minmax(0, 1fr)",
+            gap: 8,
             alignItems: "center",
             width: "100%",
             minWidth: 0,
@@ -196,6 +145,7 @@ export default function TaskManagerCard({
               textAlign: "center",
               fontWeight: 700,
               color: "#6b7280",
+              fontSize: 12,
             }}
           >
             〜
@@ -209,57 +159,18 @@ export default function TaskManagerCard({
           />
         </div>
 
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "minmax(0, 1fr) auto auto",
-            gap: 10,
-            alignItems: "center",
-            width: "100%",
-            minWidth: 0,
-          }}
-        >
-          <input
-            value={label}
-            onChange={(e) => setLabel(e.target.value)}
-            placeholder="ラベル"
-            style={inputStyle}
-          />
-
-          <button
-            type="button"
-            style={{
-              border: "1px solid #d1d5db",
-              background: "#ffffff",
-              borderRadius: 10,
-              padding: "10px 12px",
-              fontWeight: 700,
-              fontSize: 13,
-              cursor: "pointer",
-              whiteSpace: "nowrap",
-              flexShrink: 0,
-            }}
-          >
-            候補
-          </button>
-
-          <div
-            style={{
-              width: 24,
-              height: 24,
-              borderRadius: 6,
-              background: "#2563eb",
-              border: "1px solid #94a3b8",
-              flexShrink: 0,
-            }}
-          />
-        </div>
+        <input
+          value={label}
+          onChange={(e) => setLabel(e.target.value)}
+          placeholder="ラベル"
+          style={inputStyle}
+        />
 
         <div
           style={{
             display: "grid",
             gridTemplateColumns: editingTask ? "1fr 1fr" : "1fr",
-            gap: 10,
+            gap: 8,
           }}
         >
           {editingTask && (
@@ -268,15 +179,13 @@ export default function TaskManagerCard({
               onClick={handleCancel}
               style={{
                 width: "100%",
-                maxWidth: "100%",
-                boxSizing: "border-box",
                 border: "1px solid #d1d5db",
-                borderRadius: 12,
-                padding: "14px 14px",
+                borderRadius: 10,
+                padding: "11px 12px",
                 background: "#ffffff",
                 color: "#374151",
                 fontWeight: 800,
-                fontSize: 16,
+                fontSize: 14,
                 cursor: "pointer",
               }}
             >
@@ -289,15 +198,13 @@ export default function TaskManagerCard({
             onClick={handleSubmit}
             style={{
               width: "100%",
-              maxWidth: "100%",
-              boxSizing: "border-box",
               border: "none",
-              borderRadius: 12,
-              padding: "14px 14px",
+              borderRadius: 10,
+              padding: "11px 12px",
               background: "#2563eb",
               color: "#ffffff",
               fontWeight: 800,
-              fontSize: 16,
+              fontSize: 14,
               cursor: "pointer",
             }}
           >
