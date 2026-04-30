@@ -13,20 +13,20 @@ export default function HistoryCard({ tasks }) {
       <div
         style={{
           display: "flex",
-          gap: 10,
+          gap: 8,
           alignItems: "center",
           flexWrap: "wrap",
-          marginBottom: 16,
+          marginBottom: 14,
         }}
       >
         <select
           style={{
-            minWidth: 220,
-            padding: "10px 12px",
-            borderRadius: 12,
+            minWidth: 200,
+            padding: "9px 10px",
+            borderRadius: 10,
             border: "1px solid #d1d5db",
             background: "#ffffff",
-            fontSize: 14,
+            fontSize: 13,
           }}
         >
           <option>全員</option>
@@ -39,15 +39,15 @@ export default function HistoryCard({ tasks }) {
         <FilterChip>今月 ({historyTasks.length})</FilterChip>
       </div>
 
-      <div style={{ display: "grid", gap: 10 }}>
+      <div style={{ display: "grid", gap: 8 }}>
         {historyTasks.map((task) => (
           <div
             key={task.id}
             style={{
               background: "#ffffff",
               border: "1px solid #e5e7eb",
-              borderRadius: 14,
-              padding: "14px 16px",
+              borderRadius: 12,
+              padding: "12px 14px",
               display: "grid",
               gridTemplateColumns: "1fr auto",
               gap: 12,
@@ -58,10 +58,10 @@ export default function HistoryCard({ tasks }) {
               <div
                 style={{
                   fontWeight: 800,
-                  fontSize: 17,
+                  fontSize: 15,
                   color: "#111827",
                   lineHeight: 1.35,
-                  marginBottom: 6,
+                  marginBottom: 4,
                 }}
               >
                 {task.title}
@@ -70,8 +70,8 @@ export default function HistoryCard({ tasks }) {
               <div
                 style={{
                   color: "#6b7280",
-                  fontSize: 13,
-                  lineHeight: 1.65,
+                  fontSize: 12,
+                  lineHeight: 1.6,
                 }}
               >
                 期間: {formatDateRange(task.startDate, task.endDate)}

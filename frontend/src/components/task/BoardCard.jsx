@@ -32,13 +32,13 @@ export default function BoardCard({
   ];
 
   return (
-    <Card style={{ minHeight: 470 }}>
+    <Card style={{ minHeight: 360 }}>
       <div
         style={{
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          marginBottom: 14,
+          marginBottom: 12,
           gap: 10,
           flexWrap: "wrap",
         }}
@@ -46,13 +46,14 @@ export default function BoardCard({
         <SectionTitle>ボード</SectionTitle>
 
         <button
+          type="button"
           style={{
             border: "1px solid #d1d5db",
             background: "#ffffff",
-            borderRadius: 10,
-            padding: "8px 12px",
+            borderRadius: 9,
+            padding: "8px 10px",
             fontWeight: 700,
-            fontSize: 13,
+            fontSize: 12,
             cursor: "pointer",
           }}
         >
@@ -65,9 +66,9 @@ export default function BoardCard({
           display: "flex",
           alignItems: "center",
           gap: 8,
-          fontSize: 14,
+          fontSize: 13,
           color: "#374151",
-          marginBottom: 14,
+          marginBottom: 12,
         }}
       >
         <input type="checkbox" />
@@ -78,9 +79,9 @@ export default function BoardCard({
         style={{
           display: "grid",
           gridTemplateColumns: "1fr 1fr 1fr",
-          gap: 12,
+          gap: 10,
           alignItems: "start",
-          minHeight: 330,
+          minHeight: 250,
         }}
       >
         {columns.map((column) => (
@@ -91,15 +92,15 @@ export default function BoardCard({
               border: "1px solid #e5e7eb",
               borderRadius: 12,
               padding: 10,
-              minHeight: 300,
+              minHeight: 240,
             }}
           >
             <div
               style={{
                 fontWeight: 800,
-                fontSize: 18,
+                fontSize: 16,
                 color: "#111827",
-                marginBottom: 10,
+                marginBottom: 8,
                 lineHeight: 1.3,
               }}
             >

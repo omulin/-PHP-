@@ -74,7 +74,7 @@ export default function TaskManagerCard({
   };
 
   return (
-    <Card style={{ padding: 12 }}>
+    <Card style={{ padding: 14 }}>
       <SectionTitle>タスク管理</SectionTitle>
 
       <div
@@ -90,7 +90,7 @@ export default function TaskManagerCard({
       </div>
 
       <div style={{ color: "#6b7280", marginBottom: 8, fontSize: 13 }}>
-        {editingTask ? "選択中のタスクを編集しています" : "新しいタスクを追加します"}
+        {editingTask ? "選択中のタスクを編集しています" : "全体タスク表示"}
       </div>
 
       <div
@@ -105,7 +105,7 @@ export default function TaskManagerCard({
           fontSize: 12,
         }}
       >
-        {editingTask ? "編集中" : "入力モード"}
+        {editingTask ? "編集中" : "管理モード"}
       </div>
 
       <div
@@ -159,12 +159,51 @@ export default function TaskManagerCard({
           />
         </div>
 
-        <input
-          value={label}
-          onChange={(e) => setLabel(e.target.value)}
-          placeholder="ラベル"
-          style={inputStyle}
-        />
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "minmax(0, 1fr) auto auto",
+            gap: 8,
+            alignItems: "center",
+            width: "100%",
+            minWidth: 0,
+          }}
+        >
+          <input
+            value={label}
+            onChange={(e) => setLabel(e.target.value)}
+            placeholder="ラベル"
+            style={inputStyle}
+          />
+
+          <button
+            type="button"
+            style={{
+              border: "1px solid #d1d5db",
+              background: "#ffffff",
+              borderRadius: 10,
+              padding: "10px 10px",
+              fontWeight: 700,
+              fontSize: 12,
+              cursor: "pointer",
+              whiteSpace: "nowrap",
+              flexShrink: 0,
+            }}
+          >
+            候補
+          </button>
+
+          <div
+            style={{
+              width: 22,
+              height: 22,
+              borderRadius: 6,
+              background: "#2563eb",
+              border: "1px solid #94a3b8",
+              flexShrink: 0,
+            }}
+          />
+        </div>
 
         <div
           style={{

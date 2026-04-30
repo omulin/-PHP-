@@ -7,7 +7,6 @@ function parseDate(dateString) {
   if (!dateString) return null;
 
   const [year, month, day] = dateString.split("-").map(Number);
-
   if (!year || !month || !day) return null;
 
   return new Date(year, month - 1, day);
@@ -85,14 +84,14 @@ function getTaskBar(taskStart, taskEnd, rangeStart, rangeEnd) {
 
 const primaryButtonStyle = {
   border: "none",
-  borderRadius: 10,
+  borderRadius: 9,
   background: "#2563eb",
   color: "#fff",
-  padding: "10px 12px",
+  padding: "8px 10px",
   fontWeight: 800,
-  fontSize: 13,
+  fontSize: 12,
   cursor: "pointer",
-  minWidth: 72,
+  minWidth: 64,
 };
 
 export default function ScheduleCard({ tasks = [] }) {
@@ -143,8 +142,8 @@ export default function ScheduleCard({ tasks = [] }) {
   );
 
   return (
-    <Card style={{ minHeight: 470 }}>
-      <div style={{ display: "flex", gap: 8, marginBottom: 14, flexWrap: "wrap" }}>
+    <Card style={{ minHeight: 360 }}>
+      <div style={{ display: "flex", gap: 8, marginBottom: 12, flexWrap: "wrap" }}>
         <SmallTab active={view === "gantt"} onClick={() => setView("gantt")}>
           ガント
         </SmallTab>
@@ -160,15 +159,15 @@ export default function ScheduleCard({ tasks = [] }) {
               display: "flex",
               justifyContent: "space-between",
               alignItems: "center",
-              gap: 12,
+              gap: 10,
               flexWrap: "wrap",
-              marginBottom: 16,
+              marginBottom: 12,
             }}
           >
             <div
               style={{
                 fontWeight: 800,
-                fontSize: 18,
+                fontSize: 16,
                 color: "#111827",
                 whiteSpace: "nowrap",
               }}
@@ -177,25 +176,13 @@ export default function ScheduleCard({ tasks = [] }) {
             </div>
 
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-              <button
-                type="button"
-                onClick={() => setWeekOffset((prev) => prev - 1)}
-                style={primaryButtonStyle}
-              >
+              <button type="button" onClick={() => setWeekOffset((prev) => prev - 1)} style={primaryButtonStyle}>
                 前週
               </button>
-              <button
-                type="button"
-                onClick={() => setWeekOffset(0)}
-                style={primaryButtonStyle}
-              >
-                基準週
+              <button type="button" onClick={() => setWeekOffset(0)} style={primaryButtonStyle}>
+                今週
               </button>
-              <button
-                type="button"
-                onClick={() => setWeekOffset((prev) => prev + 1)}
-                style={primaryButtonStyle}
-              >
+              <button type="button" onClick={() => setWeekOffset((prev) => prev + 1)} style={primaryButtonStyle}>
                 次週
               </button>
             </div>
@@ -206,8 +193,8 @@ export default function ScheduleCard({ tasks = [] }) {
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "100px 1fr",
-              gap: 12,
+              gridTemplateColumns: "88px 1fr",
+              gap: 10,
               alignItems: "end",
               marginBottom: 10,
             }}
@@ -218,7 +205,6 @@ export default function ScheduleCard({ tasks = [] }) {
               style={{
                 display: "grid",
                 gridTemplateColumns: "repeat(14, 1fr)",
-                gap: 0,
                 border: "1px solid #e5e7eb",
                 borderRadius: 10,
                 overflow: "hidden",
@@ -229,7 +215,7 @@ export default function ScheduleCard({ tasks = [] }) {
                 <div
                   key={date.toISOString()}
                   style={{
-                    padding: "8px 4px",
+                    padding: "6px 2px",
                     textAlign: "center",
                     borderRight: index === 13 ? "none" : "1px solid #e5e7eb",
                     background: isSameDay(date, today) ? "#dbeafe" : "#f8fafc",
@@ -237,7 +223,7 @@ export default function ScheduleCard({ tasks = [] }) {
                 >
                   <div
                     style={{
-                      fontSize: 11,
+                      fontSize: 10,
                       fontWeight: 700,
                       color: "#111827",
                       lineHeight: 1.2,
@@ -248,7 +234,7 @@ export default function ScheduleCard({ tasks = [] }) {
                   <div
                     style={{
                       marginTop: 2,
-                      fontSize: 10,
+                      fontSize: 9,
                       color: "#6b7280",
                       lineHeight: 1.2,
                     }}
@@ -263,18 +249,18 @@ export default function ScheduleCard({ tasks = [] }) {
           {visibleGanttTasks.length === 0 ? (
             <div
               style={{
-                padding: 16,
+                padding: 14,
                 borderRadius: 12,
                 background: "#f8fafc",
                 border: "1px solid #e5e7eb",
                 color: "#6b7280",
-                fontSize: 14,
+                fontSize: 13,
               }}
             >
               この期間に表示できるタスクはありません
             </div>
           ) : (
-            <div style={{ display: "grid", gap: 12 }}>
+            <div style={{ display: "grid", gap: 10 }}>
               {visibleGanttTasks.map((task) => {
                 const bar = getTaskBar(task.start, task.end, ganttStart, ganttEnd);
 
@@ -283,14 +269,14 @@ export default function ScheduleCard({ tasks = [] }) {
                     key={task.id}
                     style={{
                       display: "grid",
-                      gridTemplateColumns: "100px 1fr",
-                      gap: 12,
+                      gridTemplateColumns: "88px 1fr",
+                      gap: 10,
                       alignItems: "center",
                     }}
                   >
                     <div
                       style={{
-                        fontSize: 13,
+                        fontSize: 12,
                         fontWeight: 700,
                         color: "#374151",
                         overflow: "hidden",
@@ -305,7 +291,7 @@ export default function ScheduleCard({ tasks = [] }) {
                     <div
                       style={{
                         position: "relative",
-                        height: 36,
+                        height: 28,
                         borderRadius: 10,
                         border: "1px solid #e5e7eb",
                         overflow: "hidden",
@@ -319,8 +305,8 @@ export default function ScheduleCard({ tasks = [] }) {
                             position: "absolute",
                             left: bar.left,
                             width: bar.width,
-                            top: 8,
-                            height: 20,
+                            top: 6,
+                            height: 16,
                             background: "#2563eb",
                             borderRadius: 999,
                           }}
@@ -341,9 +327,9 @@ export default function ScheduleCard({ tasks = [] }) {
               display: "flex",
               justifyContent: "space-between",
               alignItems: "center",
-              gap: 12,
+              gap: 10,
               flexWrap: "wrap",
-              marginBottom: 16,
+              marginBottom: 12,
             }}
           >
             <SectionTitle>
@@ -351,25 +337,13 @@ export default function ScheduleCard({ tasks = [] }) {
             </SectionTitle>
 
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-              <button
-                type="button"
-                onClick={() => setMonthOffset((prev) => prev - 1)}
-                style={primaryButtonStyle}
-              >
+              <button type="button" onClick={() => setMonthOffset((prev) => prev - 1)} style={primaryButtonStyle}>
                 前月
               </button>
-              <button
-                type="button"
-                onClick={() => setMonthOffset(0)}
-                style={primaryButtonStyle}
-              >
-                基準月
+              <button type="button" onClick={() => setMonthOffset(0)} style={primaryButtonStyle}>
+                今月
               </button>
-              <button
-                type="button"
-                onClick={() => setMonthOffset((prev) => prev + 1)}
-                style={primaryButtonStyle}
-              >
+              <button type="button" onClick={() => setMonthOffset((prev) => prev + 1)} style={primaryButtonStyle}>
                 次月
               </button>
             </div>
@@ -388,8 +362,8 @@ export default function ScheduleCard({ tasks = [] }) {
                 style={{
                   textAlign: "center",
                   fontWeight: 800,
-                  padding: 8,
-                  fontSize: 13,
+                  padding: 6,
+                  fontSize: 12,
                   color: "#6b7280",
                 }}
               >
@@ -398,10 +372,7 @@ export default function ScheduleCard({ tasks = [] }) {
             ))}
 
             {calendarDays.map((date) => {
-              const dayTasks = datedTasks.filter((task) =>
-                isSameDay(task.end, date)
-              );
-
+              const dayTasks = datedTasks.filter((task) => isSameDay(task.end, date));
               const isCurrentMonth = date.getMonth() === currentMonthDate.getMonth();
               const isToday = isSameDay(date, today);
 
@@ -409,23 +380,19 @@ export default function ScheduleCard({ tasks = [] }) {
                 <div
                   key={date.toISOString()}
                   style={{
-                    minHeight: 84,
-                    background: isToday
-                      ? "#dbeafe"
-                      : isCurrentMonth
-                      ? "#f8fafc"
-                      : "#f3f4f6",
+                    minHeight: 76,
+                    background: isToday ? "#dbeafe" : isCurrentMonth ? "#f8fafc" : "#f3f4f6",
                     border: "1px solid #e5e7eb",
                     borderRadius: 10,
-                    padding: 8,
-                    fontSize: 12,
+                    padding: 6,
+                    fontSize: 11,
                     color: "#374151",
                   }}
                 >
                   <div
                     style={{
                       fontWeight: 700,
-                      marginBottom: 6,
+                      marginBottom: 4,
                       color: isCurrentMonth ? "#111827" : "#9ca3af",
                     }}
                   >
@@ -440,8 +407,8 @@ export default function ScheduleCard({ tasks = [] }) {
                           background: "#ffffff",
                           color: "#1d4ed8",
                           borderRadius: 8,
-                          padding: "4px 6px",
-                          fontSize: 11,
+                          padding: "3px 5px",
+                          fontSize: 10,
                           fontWeight: 700,
                           overflow: "hidden",
                           textOverflow: "ellipsis",
@@ -456,7 +423,7 @@ export default function ScheduleCard({ tasks = [] }) {
                     {dayTasks.length > 2 && (
                       <div
                         style={{
-                          fontSize: 11,
+                          fontSize: 10,
                           color: "#6b7280",
                           fontWeight: 700,
                         }}

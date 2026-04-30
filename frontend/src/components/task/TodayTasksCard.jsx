@@ -11,7 +11,7 @@ export default function TodayTasksCard({
   const todayTasks = tasks.slice(0, 3);
 
   return (
-    <Card style={{ minHeight: 470 }}>
+    <Card style={{ minHeight: 360 }}>
       <SectionTitle>今日のタスク</SectionTitle>
 
       <div
@@ -19,7 +19,7 @@ export default function TodayTasksCard({
           display: "grid",
           gridTemplateColumns: "1fr 1fr",
           gap: 8,
-          marginBottom: 14,
+          marginBottom: 12,
         }}
       >
         <FilterChip active>自分 (2)</FilterChip>
@@ -28,7 +28,7 @@ export default function TodayTasksCard({
         <FilterChip active={false}>スタッフ以上 (2)</FilterChip>
       </div>
 
-      <div style={{ maxHeight: 330, overflowY: "auto", paddingRight: 4 }}>
+      <div style={{ maxHeight: 280, overflowY: "auto", paddingRight: 4 }}>
         {todayTasks.map((task) => (
           <div
             key={`today-${task.id}`}
@@ -36,15 +36,15 @@ export default function TodayTasksCard({
               background: "#ffffff",
               border: "1px solid #e5e7eb",
               borderRadius: 12,
-              padding: 12,
+              padding: 10,
               borderLeft: "4px solid #2563eb",
-              marginBottom: 10,
+              marginBottom: 8,
             }}
           >
             <div
               style={{
                 fontWeight: 800,
-                fontSize: 18,
+                fontSize: 16,
                 lineHeight: 1.35,
                 color: "#111827",
                 marginBottom: 8,
@@ -59,11 +59,11 @@ export default function TodayTasksCard({
               onChange={(e) => onChangeStatus(task.id, e.target.value)}
               style={{
                 width: "100%",
-                padding: "9px 10px",
-                borderRadius: 10,
+                padding: "8px 9px",
+                borderRadius: 9,
                 border: "1px solid #d1d5db",
                 background: "#ffffff",
-                fontSize: 13,
+                fontSize: 12,
                 boxSizing: "border-box",
               }}
             >
@@ -86,10 +86,10 @@ export default function TodayTasksCard({
                 style={{
                   border: "1px solid #d1d5db",
                   background: "#ffffff",
-                  borderRadius: 10,
-                  padding: "8px 10px",
+                  borderRadius: 9,
+                  padding: "8px 9px",
                   fontWeight: 700,
-                  fontSize: 13,
+                  fontSize: 12,
                   cursor: "pointer",
                   color: "#374151",
                 }}
@@ -103,10 +103,10 @@ export default function TodayTasksCard({
                 style={{
                   border: "1px solid #fecaca",
                   background: "#fef2f2",
-                  borderRadius: 10,
-                  padding: "8px 10px",
+                  borderRadius: 9,
+                  padding: "8px 9px",
                   fontWeight: 700,
-                  fontSize: 13,
+                  fontSize: 12,
                   cursor: "pointer",
                   color: "#b91c1c",
                 }}

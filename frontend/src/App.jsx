@@ -4,8 +4,6 @@ import { initialTasks } from "./data/dummyTasks";
 import MainLayout from "./components/layout/MainLayout";
 import LeftPanel from "./components/layout/LeftPanel";
 import RightPanel from "./components/layout/RightPanel";
-import Card from "./components/common/Card";
-import SmallTab from "./components/common/SmallTab";
 import TaskManagerCard from "./components/task/TaskManagerCard";
 import SearchFilterBar from "./components/task/SearchFilterBar";
 import TodayTasksCard from "./components/task/TodayTasksCard";
@@ -51,8 +49,6 @@ export default function App() {
   const [isLogin, setIsLogin] = useState(false);
   const [tasks, setTasks] = useState(() => loadTasksFromStorage());
   const [editingTask, setEditingTask] = useState(null);
-  const [isFormOpen, setIsFormOpen] = useState(false);
-  const [activeView, setActiveView] = useState("board");
   const [searchText, setSearchText] = useState("");
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [sortType, setSortType] = useState("latest");
@@ -113,18 +109,15 @@ export default function App() {
       ...prev,
     ]);
 
-    setIsFormOpen(false);
     showToast("タスクを追加しました", "add");
   };
 
   const handleStartEdit = (task) => {
     setEditingTask(task);
-    setIsFormOpen(true);
   };
 
   const handleCancelEdit = () => {
     setEditingTask(null);
-    setIsFormOpen(false);
   };
 
   const handleUpdateTask = ({ id, title, label, startDate, endDate }) => {
@@ -143,7 +136,6 @@ export default function App() {
     );
 
     setEditingTask(null);
-    setIsFormOpen(false);
     showToast("タスクを更新しました", "update");
   };
 
@@ -158,7 +150,6 @@ export default function App() {
 
     if (editingTask && editingTask.id === id) {
       setEditingTask(null);
-      setIsFormOpen(false);
     }
 
     showToast("タスクを削除しました", "delete");
@@ -211,44 +202,6 @@ export default function App() {
     return sorted;
   }, [tasks, searchText, statusFilter, sortType]);
 
-  const currentView = useMemo(() => {
-    switch (activeView) {
-      case "today":
-        return (
-          <TodayTasksCard
-            tasks={visibleTasks}
-            onChangeStatus={handleStatusChange}
-            onEditTask={handleStartEdit}
-            onDeleteTask={handleDeleteTask}
-          />
-        );
-      case "schedule":
-        return <ScheduleCard tasks={visibleTasks} />;
-      case "history":
-        return <HistoryCard tasks={visibleTasks} />;
-      case "board":
-      default:
-        return (
-          <BoardCard
-            tasks={visibleTasks}
-            onChangeStatus={handleStatusChange}
-            onEditTask={handleStartEdit}
-            onDeleteTask={handleDeleteTask}
-          />
-        );
-    }
-  }, [activeView, visibleTasks]);
-
-  const handleToggleForm = () => {
-    if (editingTask) {
-      setEditingTask(null);
-      setIsFormOpen(false);
-      return;
-    }
-
-    setIsFormOpen((prev) => !prev);
-  };
-
   if (!isLogin) {
     return <Login onLogin={() => setIsLogin(true)} />;
   }
@@ -292,112 +245,46 @@ export default function App() {
       )}
 
       <MainLayout
-        left={<LeftPanel />}
-        top={
-          <div style={{ display: "grid", gap: 12 }}>
-            <SearchFilterBar
-              searchText={searchText}
-              onSearchTextChange={setSearchText}
-              statusFilter={statusFilter}
-              onStatusFilterChange={setStatusFilter}
-              sortType={sortType}
-              onSortTypeChange={setSortType}
-              resultCount={visibleTasks.length}
-            />
-
-            <Card style={{ padding: 12 }}>
-              <div style={{ display: "grid", gap: 10 }}>
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    gap: 10,
-                    flexWrap: "wrap",
-                  }}
-                >
-                  <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                    <SmallTab
-                      active={activeView === "today"}
-                      onClick={() => setActiveView("today")}
-                    >
-                      今日
-                    </SmallTab>
-                    <SmallTab
-                      active={activeView === "board"}
-                      onClick={() => setActiveView("board")}
-                    >
-                      ボード
-                    </SmallTab>
-                    <SmallTab
-                      active={activeView === "schedule"}
-                      onClick={() => setActiveView("schedule")}
-                    >
-                      スケジュール
-                    </SmallTab>
-                    <SmallTab
-                      active={activeView === "history"}
-                      onClick={() => setActiveView("history")}
-                    >
-                      履歴
-                    </SmallTab>
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={handleToggleForm}
-                    style={{
-                      border: "none",
-                      borderRadius: 10,
-                      padding: "10px 12px",
-                      background: editingTask ? "#f59e0b" : "#2563eb",
-                      color: "#ffffff",
-                      fontWeight: 800,
-                      fontSize: 13,
-                      cursor: "pointer",
-                      whiteSpace: "nowrap",
-                    }}
-                  >
-                    {editingTask
-                      ? "編集を閉じる"
-                      : isFormOpen
-                      ? "フォームを閉じる"
-                      : "新規タスク"}
-                  </button>
-                </div>
-
-                {editingTask && (
-                  <div
-                    style={{
-                      display: "inline-block",
-                      background: "#fef3c7",
-                      color: "#92400e",
-                      padding: "6px 10px",
-                      borderRadius: 999,
-                      fontWeight: 700,
-                      fontSize: 12,
-                      justifySelf: "start",
-                    }}
-                  >
-                    編集中: {editingTask.title}
-                  </div>
-                )}
-              </div>
-            </Card>
-
-            {(isFormOpen || editingTask) && (
-              <TaskManagerCard
-                onAddTask={handleAddTask}
-                onUpdateTask={handleUpdateTask}
-                editingTask={editingTask}
-                onCancelEdit={handleCancelEdit}
-              />
-            )}
-          </div>
-        }
-        center={currentView}
-        right={<RightPanel tasks={tasks} />}
-      />
+  leftTop={<LeftPanel />}
+  centerTop={
+    <TaskManagerCard
+      onAddTask={handleAddTask}
+      onUpdateTask={handleUpdateTask}
+      editingTask={editingTask}
+      onCancelEdit={handleCancelEdit}
+    />
+  }
+  rightTop={<RightPanel tasks={tasks} />}
+  toolbar={
+    <SearchFilterBar
+      searchText={searchText}
+      onSearchTextChange={setSearchText}
+      statusFilter={statusFilter}
+      onStatusFilterChange={setStatusFilter}
+      sortType={sortType}
+      onSortTypeChange={setSortType}
+      resultCount={visibleTasks.length}
+    />
+  }
+  leftMiddle={
+    <TodayTasksCard
+      tasks={visibleTasks}
+      onChangeStatus={handleStatusChange}
+      onEditTask={handleStartEdit}
+      onDeleteTask={handleDeleteTask}
+    />
+  }
+  centerMiddle={
+    <BoardCard
+      tasks={visibleTasks}
+      onChangeStatus={handleStatusChange}
+      onEditTask={handleStartEdit}
+      onDeleteTask={handleDeleteTask}
+    />
+  }
+  rightMiddle={<ScheduleCard tasks={visibleTasks} />}
+  bottom={<HistoryCard tasks={visibleTasks} />}
+/>
     </div>
   );
 }
