@@ -5,8 +5,8 @@ export default function SmallTab({ active, children, onClick }) {
       onClick={onClick}
       style={{
         border: active ? "1px solid #93c5fd" : "1px solid #d1d5db",
-        borderRadius: 9,
-        padding: "6px 10px",
+        borderRadius: 10,
+        padding: "7px 11px",
         fontWeight: 700,
         fontSize: 12,
         lineHeight: 1.2,

@@ -7,7 +7,7 @@ export default function HistoryCard({ tasks }) {
   const historyTasks = getDoneTasks(tasks);
 
   return (
-    <Card>
+    <Card style={{ padding: 14 }}>
       <SectionTitle>過去の記録</SectionTitle>
 
       <div

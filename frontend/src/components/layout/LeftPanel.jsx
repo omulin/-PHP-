@@ -4,24 +4,24 @@ import SmallTab from "../common/SmallTab";
 
 export default function LeftPanel() {
   return (
-    <Card>
+    <Card style={{ padding: 14 }}>
       <SectionTitle>支援管理システム</SectionTitle>
 
-      <div style={{ display: "flex", gap: 8, marginBottom: 10, flexWrap: "wrap" }}>
+      <div style={{ display: "flex", gap: 8, marginBottom: 8, flexWrap: "wrap" }}>
         <SmallTab active={false}>利用者</SmallTab>
         <SmallTab active>管理者</SmallTab>
       </div>
 
-      <div style={{ display: "flex", gap: 8, marginBottom: 18, flexWrap: "wrap" }}>
+      <div style={{ display: "flex", gap: 8, marginBottom: 16, flexWrap: "wrap" }}>
         <SmallTab active>タスク管理</SmallTab>
         <SmallTab active={false}>利用者管理</SmallTab>
       </div>
 
-      <div style={{ fontSize: 20, fontWeight: 800, marginBottom: 6 }}>
+      <div style={{ fontSize: 18, fontWeight: 800, marginBottom: 6 }}>
         朝倉悠翔
       </div>
 
-      <div style={{ fontSize: 14, color: "#6b7280", marginBottom: 14 }}>
+      <div style={{ fontSize: 13, color: "#6b7280", marginBottom: 14 }}>
         yuto330309@gmail.com
       </div>
 
@@ -30,11 +30,11 @@ export default function LeftPanel() {
           display: "inline-block",
           background: "#dbeafe",
           color: "#1d4ed8",
-          padding: "6px 12px",
+          padding: "6px 10px",
           borderRadius: 999,
           fontWeight: 700,
-          fontSize: 13,
-          marginBottom: 18,
+          fontSize: 12,
+          marginBottom: 16,
         }}
       >
         権限 : STAFF
@@ -45,11 +45,11 @@ export default function LeftPanel() {
           width: "100%",
           border: "none",
           borderRadius: 12,
-          padding: "14px 16px",
+          padding: "13px 14px",
           background: "#2563eb",
           color: "#ffffff",
           fontWeight: 800,
-          fontSize: 16,
+          fontSize: 15,
           cursor: "pointer",
         }}
       >

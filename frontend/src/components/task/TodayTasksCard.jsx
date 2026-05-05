@@ -11,7 +11,7 @@ export default function TodayTasksCard({
   const todayTasks = tasks.slice(0, 3);
 
   return (
-    <Card style={{ minHeight: 360 }}>
+    <Card style={{ minHeight: 360, padding: 14 }}>
       <SectionTitle>今日のタスク</SectionTitle>
 
       <div
@@ -22,13 +22,13 @@ export default function TodayTasksCard({
           marginBottom: 12,
         }}
       >
-        <FilterChip active>自分 (2)</FilterChip>
+        <FilterChip active>自分 ({todayTasks.length})</FilterChip>
         <FilterChip active={false}>サブチーム (0)</FilterChip>
         <FilterChip active={false}>チーム (0)</FilterChip>
-        <FilterChip active={false}>スタッフ以上 (2)</FilterChip>
+        <FilterChip active={false}>スタッフ以上 ({todayTasks.length})</FilterChip>
       </div>
 
-      <div style={{ maxHeight: 280, overflowY: "auto", paddingRight: 4 }}>
+      <div style={{ maxHeight: 290, overflowY: "auto", paddingRight: 4 }}>
         {todayTasks.map((task) => (
           <div
             key={`today-${task.id}`}
@@ -44,7 +44,7 @@ export default function TodayTasksCard({
             <div
               style={{
                 fontWeight: 800,
-                fontSize: 16,
+                fontSize: 15,
                 lineHeight: 1.35,
                 color: "#111827",
                 marginBottom: 8,
