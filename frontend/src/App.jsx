@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
 import Login from "./pages/Login";
-import { initialTasks } from "./data/dummyTasks";
 import MainLayout from "./components/layout/MainLayout";
 import LeftPanel from "./components/layout/LeftPanel";
 import RightPanel from "./components/layout/RightPanel";
@@ -10,33 +9,7 @@ import TodayTasksCard from "./components/task/TodayTasksCard";
 import BoardCard from "./components/task/BoardCard";
 import HistoryCard from "./components/task/HistoryCard";
 import ScheduleCard from "./components/schedule/ScheduleCard";
-
-const STORAGE_KEY = "task-manager-tasks";
-
-function loadTasksFromStorage() {
-  try {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (!saved) return initialTasks;
-
-    const parsed = JSON.parse(saved);
-    return Array.isArray(parsed) ? parsed : initialTasks;
-  } catch (error) {
-    console.error("保存データの読み込みに失敗しました:", error);
-    return initialTasks;
-  }
-}
-
-function formatNow() {
-  const now = new Date();
-
-  const year = now.getFullYear();
-  const month = String(now.getMonth() + 1).padStart(2, "0");
-  const day = String(now.getDate()).padStart(2, "0");
-  const hours = String(now.getHours()).padStart(2, "0");
-  const minutes = String(now.getMinutes()).padStart(2, "0");
-
-  return `${year}-${month}-${day} ${hours}:${minutes}`;
-}
+import useTasks from "./hooks/useTasks";
 
 function getDateValue(dateString) {
   if (!dateString) return 0;
@@ -47,24 +20,23 @@ function getDateValue(dateString) {
 
 export default function App() {
   const [isLogin, setIsLogin] = useState(false);
-  const [tasks, setTasks] = useState(() => loadTasksFromStorage());
   const [editingTask, setEditingTask] = useState(null);
   const [searchText, setSearchText] = useState("");
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [sortType, setSortType] = useState("latest");
   const [toast, setToast] = useState(null);
 
+  const {
+    tasks,
+    handleStatusChange: updateTaskStatus,
+    handleAddTask: addTask,
+    handleUpdateTask: updateTask,
+    handleDeleteTask: deleteTask,
+  } = useTasks();
+
   const showToast = (message, type = "default") => {
     setToast({ message, type });
   };
-
-  useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
-    } catch (error) {
-      console.error("保存データの書き込みに失敗しました:", error);
-    }
-  }, [tasks]);
 
   useEffect(() => {
     if (!toast) return;
@@ -77,38 +49,12 @@ export default function App() {
   }, [toast]);
 
   const handleStatusChange = (id, nextStatus) => {
-    setTasks((prev) =>
-      prev.map((task) => {
-        if (task.id !== id) return task;
-
-        return {
-          ...task,
-          status: nextStatus,
-          completedAt:
-            nextStatus === "DONE" ? task.completedAt || formatNow() : null,
-        };
-      })
-    );
-
+    updateTaskStatus(id, nextStatus);
     showToast("ステータスを更新しました", "success");
   };
 
   const handleAddTask = ({ title, label, startDate, endDate }) => {
-    setTasks((prev) => [
-      {
-        id: Date.now(),
-        title,
-        label,
-        status: "TODO",
-        startDate,
-        endDate,
-        createdBy: "朝倉悠翔",
-        assignee: "朝倉悠翔",
-        completedAt: null,
-      },
-      ...prev,
-    ]);
-
+    addTask({ title, label, startDate, endDate });
     showToast("タスクを追加しました", "add");
   };
 
@@ -121,32 +67,21 @@ export default function App() {
   };
 
   const handleUpdateTask = ({ id, title, label, startDate, endDate }) => {
-    setTasks((prev) =>
-      prev.map((task) =>
-        task.id === id
-          ? {
-              ...task,
-              title,
-              label,
-              startDate,
-              endDate,
-            }
-          : task
-      )
-    );
-
+    updateTask({ id, title, label, startDate, endDate });
     setEditingTask(null);
     showToast("タスクを更新しました", "update");
   };
 
   const handleDeleteTask = (id) => {
     const targetTask = tasks.find((task) => task.id === id);
+
     if (!targetTask) return;
 
     const ok = window.confirm(`「${targetTask.title}」を削除しますか？`);
+
     if (!ok) return;
 
-    setTasks((prev) => prev.filter((task) => task.id !== id));
+    deleteTask(id);
 
     if (editingTask && editingTask.id === id) {
       setEditingTask(null);
@@ -245,46 +180,46 @@ export default function App() {
       )}
 
       <MainLayout
-  leftTop={<LeftPanel />}
-  centerTop={
-    <TaskManagerCard
-      onAddTask={handleAddTask}
-      onUpdateTask={handleUpdateTask}
-      editingTask={editingTask}
-      onCancelEdit={handleCancelEdit}
-    />
-  }
-  rightTop={<RightPanel tasks={tasks} />}
-  toolbar={
-    <SearchFilterBar
-      searchText={searchText}
-      onSearchTextChange={setSearchText}
-      statusFilter={statusFilter}
-      onStatusFilterChange={setStatusFilter}
-      sortType={sortType}
-      onSortTypeChange={setSortType}
-      resultCount={visibleTasks.length}
-    />
-  }
-  leftMiddle={
-    <TodayTasksCard
-      tasks={visibleTasks}
-      onChangeStatus={handleStatusChange}
-      onEditTask={handleStartEdit}
-      onDeleteTask={handleDeleteTask}
-    />
-  }
-  centerMiddle={
-    <BoardCard
-      tasks={visibleTasks}
-      onChangeStatus={handleStatusChange}
-      onEditTask={handleStartEdit}
-      onDeleteTask={handleDeleteTask}
-    />
-  }
-  rightMiddle={<ScheduleCard tasks={visibleTasks} />}
-  bottom={<HistoryCard tasks={visibleTasks} />}
-/>
+        leftTop={<LeftPanel />}
+        centerTop={
+          <TaskManagerCard
+            onAddTask={handleAddTask}
+            onUpdateTask={handleUpdateTask}
+            editingTask={editingTask}
+            onCancelEdit={handleCancelEdit}
+          />
+        }
+        rightTop={<RightPanel tasks={tasks} />}
+        toolbar={
+          <SearchFilterBar
+            searchText={searchText}
+            onSearchTextChange={setSearchText}
+            statusFilter={statusFilter}
+            onStatusFilterChange={setStatusFilter}
+            sortType={sortType}
+            onSortTypeChange={setSortType}
+            resultCount={visibleTasks.length}
+          />
+        }
+        leftMiddle={
+          <TodayTasksCard
+            tasks={visibleTasks}
+            onChangeStatus={handleStatusChange}
+            onEditTask={handleStartEdit}
+            onDeleteTask={handleDeleteTask}
+          />
+        }
+        centerMiddle={
+          <BoardCard
+            tasks={visibleTasks}
+            onChangeStatus={handleStatusChange}
+            onEditTask={handleStartEdit}
+            onDeleteTask={handleDeleteTask}
+          />
+        }
+        rightMiddle={<ScheduleCard tasks={visibleTasks} />}
+        bottom={<HistoryCard tasks={visibleTasks} />}
+      />
     </div>
   );
 }
