@@ -15,11 +15,11 @@ export default function SearchFilterBar({
     minWidth: 0,
     boxSizing: "border-box",
     padding: "10px 10px",
-    borderRadius: 10,
-    border: "1px solid #d1d5db",
+    borderRadius: "var(--radius-sm, 10px)",
+    border: "1px solid var(--color-border-strong, #d1d5db)",
     fontSize: 13,
-    background: "#ffffff",
-    color: "#111827",
+    background: "var(--color-bg-card, #ffffff)",
+    color: "var(--color-text-main, #111827)",
   };
 
   const handleClearConditions = () => {
@@ -73,22 +73,27 @@ export default function SearchFilterBar({
             type="button"
             onClick={handleClearConditions}
             style={{
-              border: "1px solid #d1d5db",
-              background: "#ffffff",
-              borderRadius: 10,
+              border: "1px solid var(--color-border-strong, #d1d5db)",
+              background: "var(--color-bg-card, #ffffff)",
+              borderRadius: "var(--radius-sm, 10px)",
               padding: "10px 12px",
               fontWeight: 700,
               fontSize: 12,
               cursor: "pointer",
               whiteSpace: "nowrap",
-              color: "#374151",
+              color: "var(--color-text-soft, #374151)",
             }}
           >
             条件クリア
           </button>
         </div>
 
-        <div style={{ fontSize: 12, color: "#6b7280" }}>
+        <div
+          style={{
+            fontSize: 12,
+            color: "var(--color-text-sub, #6b7280)",
+          }}
+        >
           表示件数: {resultCount}件
         </div>
       </div>
