@@ -13,6 +13,7 @@ export default function TaskManagerCard({
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [label, setLabel] = useState("");
+  const [formError, setFormError] = useState("");
 
   useEffect(() => {
     if (editingTask) {
@@ -26,25 +27,33 @@ export default function TaskManagerCard({
       setEndDate("");
       setLabel("");
     }
+
+    setFormError("");
   }, [editingTask]);
 
   const handleSubmit = () => {
-    if (!title.trim()) return;
-
     const taskData = {
-      title: title.trim(),
-      label: label.trim() || "ラベルなし",
-      startDate: startDate || "2025-04-02",
-      endDate: endDate || "2025-04-05",
+      title,
+      label,
+      startDate,
+      endDate,
     };
 
-    if (editingTask) {
-      onUpdateTask({
-        id: editingTask.id,
-        ...taskData,
-      });
-    } else {
-      onAddTask(taskData);
+    const result = editingTask
+      ? onUpdateTask({
+          id: editingTask.id,
+          ...taskData,
+        })
+      : onAddTask(taskData);
+
+    if (result && !result.ok) {
+      setFormError(result.message || "入力内容を確認してください。");
+      return;
+    }
+
+    setFormError("");
+
+    if (!editingTask) {
       setTitle("");
       setStartDate("");
       setEndDate("");
@@ -57,6 +66,7 @@ export default function TaskManagerCard({
     setStartDate("");
     setEndDate("");
     setLabel("");
+    setFormError("");
     onCancelEdit();
   };
 
@@ -107,6 +117,24 @@ export default function TaskManagerCard({
       >
         {editingTask ? "編集中" : "管理モード"}
       </div>
+
+      {formError && (
+        <div
+          style={{
+            marginBottom: 12,
+            padding: "10px 12px",
+            borderRadius: 10,
+            background: "#fef2f2",
+            border: "1px solid #fecaca",
+            color: "#b91c1c",
+            fontSize: 12,
+            fontWeight: 700,
+            lineHeight: 1.5,
+          }}
+        >
+          {formError}
+        </div>
+      )}
 
       <div
         style={{

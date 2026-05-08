@@ -30,6 +30,35 @@ function formatNow() {
   return `${year}-${month}-${day} ${hours}:${minutes}`;
 }
 
+function validateTaskInput({ title, label, startDate, endDate }) {
+  const trimmedTitle = String(title || "").trim();
+  const trimmedLabel = String(label || "").trim();
+
+  if (!trimmedTitle) {
+    return {
+      ok: false,
+      message: "タスク名を入力してください。",
+    };
+  }
+
+  if (startDate && endDate && startDate > endDate) {
+    return {
+      ok: false,
+      message: "開始日は終了日より前の日付にしてください。",
+    };
+  }
+
+  return {
+    ok: true,
+    data: {
+      title: trimmedTitle,
+      label: trimmedLabel || "ラベルなし",
+      startDate: startDate || "2025-04-02",
+      endDate: endDate || "2025-04-05",
+    },
+  };
+}
+
 export default function useTasks() {
   const [tasks, setTasks] = useState(() => loadTasksFromStorage());
 
@@ -56,43 +85,66 @@ export default function useTasks() {
         };
       })
     );
+
+    return { ok: true };
   };
 
   const handleAddTask = ({ title, label, startDate, endDate }) => {
+    const result = validateTaskInput({ title, label, startDate, endDate });
+
+    if (!result.ok) {
+      return result;
+    }
+
+    const taskData = result.data;
+
     setTasks((prev) => [
       {
         id: Date.now(),
-        title,
-        label,
+        title: taskData.title,
+        label: taskData.label,
         status: "TODO",
-        startDate,
-        endDate,
+        startDate: taskData.startDate,
+        endDate: taskData.endDate,
         createdBy: "朝倉悠翔",
         assignee: "朝倉悠翔",
         completedAt: null,
       },
       ...prev,
     ]);
+
+    return { ok: true };
   };
 
   const handleUpdateTask = ({ id, title, label, startDate, endDate }) => {
+    const result = validateTaskInput({ title, label, startDate, endDate });
+
+    if (!result.ok) {
+      return result;
+    }
+
+    const taskData = result.data;
+
     setTasks((prev) =>
       prev.map((task) =>
         task.id === id
           ? {
               ...task,
-              title,
-              label,
-              startDate,
-              endDate,
+              title: taskData.title,
+              label: taskData.label,
+              startDate: taskData.startDate,
+              endDate: taskData.endDate,
             }
           : task
       )
     );
+
+    return { ok: true };
   };
 
   const handleDeleteTask = (id) => {
     setTasks((prev) => prev.filter((task) => task.id !== id));
+    return { ok: true };
   };
 
   return {

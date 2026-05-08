@@ -49,13 +49,27 @@ export default function App() {
   }, [toast]);
 
   const handleStatusChange = (id, nextStatus) => {
-    updateTaskStatus(id, nextStatus);
+    const result = updateTaskStatus(id, nextStatus);
+
+    if (!result.ok) {
+      showToast(result.message || "ステータス更新に失敗しました。", "error");
+      return result;
+    }
+
     showToast("ステータスを更新しました", "success");
+    return result;
   };
 
   const handleAddTask = ({ title, label, startDate, endDate }) => {
-    addTask({ title, label, startDate, endDate });
+    const result = addTask({ title, label, startDate, endDate });
+
+    if (!result.ok) {
+      showToast(result.message || "入力内容を確認してください。", "error");
+      return result;
+    }
+
     showToast("タスクを追加しました", "add");
+    return result;
   };
 
   const handleStartEdit = (task) => {
@@ -67,27 +81,45 @@ export default function App() {
   };
 
   const handleUpdateTask = ({ id, title, label, startDate, endDate }) => {
-    updateTask({ id, title, label, startDate, endDate });
+    const result = updateTask({ id, title, label, startDate, endDate });
+
+    if (!result.ok) {
+      showToast(result.message || "入力内容を確認してください。", "error");
+      return result;
+    }
+
     setEditingTask(null);
     showToast("タスクを更新しました", "update");
+    return result;
   };
 
   const handleDeleteTask = (id) => {
     const targetTask = tasks.find((task) => task.id === id);
 
-    if (!targetTask) return;
+    if (!targetTask) {
+      showToast("削除対象のタスクが見つかりません。", "error");
+      return { ok: false };
+    }
 
     const ok = window.confirm(`「${targetTask.title}」を削除しますか？`);
 
-    if (!ok) return;
+    if (!ok) {
+      return { ok: false, canceled: true };
+    }
 
-    deleteTask(id);
+    const result = deleteTask(id);
+
+    if (!result.ok) {
+      showToast(result.message || "タスク削除に失敗しました。", "error");
+      return result;
+    }
 
     if (editingTask && editingTask.id === id) {
       setEditingTask(null);
     }
 
     showToast("タスクを削除しました", "delete");
+    return result;
   };
 
   const visibleTasks = useMemo(() => {
@@ -172,6 +204,10 @@ export default function App() {
                 ? "#dc2626"
                 : toast.type === "success"
                 ? "#16a34a"
+                : toast.type === "update"
+                ? "#2563eb"
+                : toast.type === "error"
+                ? "#b91c1c"
                 : "#111827",
           }}
         >
