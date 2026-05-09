@@ -31,7 +31,7 @@ export default function TaskManagerCard({
     setFormError("");
   }, [editingTask]);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const taskData = {
       title,
       label,
@@ -40,14 +40,16 @@ export default function TaskManagerCard({
     };
 
     const result = editingTask
-      ? onUpdateTask({
+      ? await onUpdateTask({
           id: editingTask.id,
           ...taskData,
         })
-      : onAddTask(taskData);
+      : await onAddTask(taskData);
 
     if (result && !result.ok) {
-      setFormError(result.message || "入力内容を確認してください。");
+      if (!result.canceled) {
+        setFormError(result.message || "入力内容を確認してください。");
+      }
       return;
     }
 
@@ -76,11 +78,11 @@ export default function TaskManagerCard({
     minWidth: 0,
     boxSizing: "border-box",
     padding: "11px 10px",
-    borderRadius: 10,
-    border: "1px solid #d1d5db",
+    borderRadius: "var(--radius-sm, 10px)",
+    border: "1px solid var(--color-border-strong, #d1d5db)",
     fontSize: 13,
-    background: "#ffffff",
-    color: "#111827",
+    background: "var(--color-bg-card, #ffffff)",
+    color: "var(--color-text-main, #111827)",
   };
 
   return (
@@ -99,7 +101,13 @@ export default function TaskManagerCard({
         <SmallTab active={!!editingTask}>編集</SmallTab>
       </div>
 
-      <div style={{ color: "#6b7280", marginBottom: 8, fontSize: 13 }}>
+      <div
+        style={{
+          color: "var(--color-text-sub, #6b7280)",
+          marginBottom: 8,
+          fontSize: 13,
+        }}
+      >
         {editingTask ? "選択中のタスクを編集しています" : "全体タスク表示"}
       </div>
 
@@ -123,10 +131,10 @@ export default function TaskManagerCard({
           style={{
             marginBottom: 12,
             padding: "10px 12px",
-            borderRadius: 10,
-            background: "#fef2f2",
-            border: "1px solid #fecaca",
-            color: "#b91c1c",
+            borderRadius: "var(--radius-sm, 10px)",
+            background: "var(--color-danger-soft, #fef2f2)",
+            border: "1px solid var(--color-danger-border, #fecaca)",
+            color: "var(--color-danger, #b91c1c)",
             fontSize: 12,
             fontWeight: 700,
             lineHeight: 1.5,
@@ -172,7 +180,7 @@ export default function TaskManagerCard({
             style={{
               textAlign: "center",
               fontWeight: 700,
-              color: "#6b7280",
+              color: "var(--color-text-sub, #6b7280)",
               fontSize: 12,
             }}
           >
@@ -207,15 +215,16 @@ export default function TaskManagerCard({
           <button
             type="button"
             style={{
-              border: "1px solid #d1d5db",
-              background: "#ffffff",
-              borderRadius: 10,
+              border: "1px solid var(--color-border-strong, #d1d5db)",
+              background: "var(--color-bg-card, #ffffff)",
+              borderRadius: "var(--radius-sm, 10px)",
               padding: "10px 10px",
               fontWeight: 700,
               fontSize: 12,
               cursor: "pointer",
               whiteSpace: "nowrap",
               flexShrink: 0,
+              color: "var(--color-text-soft, #374151)",
             }}
           >
             候補
@@ -226,8 +235,8 @@ export default function TaskManagerCard({
               width: 22,
               height: 22,
               borderRadius: 6,
-              background: "#2563eb",
-              border: "1px solid #94a3b8",
+              background: "var(--color-primary, #2563eb)",
+              border: "1px solid var(--color-border-strong, #d1d5db)",
               flexShrink: 0,
             }}
           />
@@ -246,11 +255,11 @@ export default function TaskManagerCard({
               onClick={handleCancel}
               style={{
                 width: "100%",
-                border: "1px solid #d1d5db",
-                borderRadius: 10,
+                border: "1px solid var(--color-border-strong, #d1d5db)",
+                borderRadius: "var(--radius-sm, 10px)",
                 padding: "11px 12px",
-                background: "#ffffff",
-                color: "#374151",
+                background: "var(--color-bg-card, #ffffff)",
+                color: "var(--color-text-soft, #374151)",
                 fontWeight: 800,
                 fontSize: 14,
                 cursor: "pointer",
@@ -266,9 +275,9 @@ export default function TaskManagerCard({
             style={{
               width: "100%",
               border: "none",
-              borderRadius: 10,
+              borderRadius: "var(--radius-sm, 10px)",
               padding: "11px 12px",
-              background: "#2563eb",
+              background: "var(--color-primary, #2563eb)",
               color: "#ffffff",
               fontWeight: 800,
               fontSize: 14,

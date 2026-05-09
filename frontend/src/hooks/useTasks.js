@@ -1,34 +1,10 @@
 import { useEffect, useState } from "react";
-import { initialTasks } from "../data/dummyTasks";
-
-const STORAGE_KEY = "task-manager-tasks";
-
-function loadTasksFromStorage() {
-  try {
-    const saved = localStorage.getItem(STORAGE_KEY);
-
-    if (!saved) return initialTasks;
-
-    const parsed = JSON.parse(saved);
-
-    return Array.isArray(parsed) ? parsed : initialTasks;
-  } catch (error) {
-    console.error("保存データの読み込みに失敗しました:", error);
-    return initialTasks;
-  }
-}
-
-function formatNow() {
-  const now = new Date();
-
-  const year = now.getFullYear();
-  const month = String(now.getMonth() + 1).padStart(2, "0");
-  const day = String(now.getDate()).padStart(2, "0");
-  const hours = String(now.getHours()).padStart(2, "0");
-  const minutes = String(now.getMinutes()).padStart(2, "0");
-
-  return `${year}-${month}-${day} ${hours}:${minutes}`;
-}
+import {
+  fetchTasks,
+  createTask,
+  updateTask as updateTaskApi,
+  deleteTask as deleteTaskApi,
+} from "../api/tasks";
 
 function validateTaskInput({ title, label, startDate, endDate }) {
   const trimmedTitle = String(title || "").trim();
@@ -53,103 +29,115 @@ function validateTaskInput({ title, label, startDate, endDate }) {
     data: {
       title: trimmedTitle,
       label: trimmedLabel || "ラベルなし",
-      startDate: startDate || "2025-04-02",
-      endDate: endDate || "2025-04-05",
+      startDate: startDate || "2026-05-09",
+      endDate: endDate || "2026-05-12",
     },
   };
 }
 
 export default function useTasks() {
-  const [tasks, setTasks] = useState(() => loadTasksFromStorage());
+  const [tasks, setTasks] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
-    } catch (error) {
-      console.error("保存データの書き込みに失敗しました:", error);
-    }
-  }, [tasks]);
+    const load = async () => {
+      setIsLoading(true);
 
-  const handleStatusChange = (id, nextStatus) => {
-    setTasks((prev) =>
-      prev.map((task) => {
-        if (task.id !== id) return task;
+      const result = await fetchTasks();
 
-        return {
-          ...task,
-          status: nextStatus,
-          completedAt:
-            nextStatus === "DONE"
-              ? task.completedAt || formatNow()
-              : null,
-        };
-      })
-    );
+      if (result.ok) {
+        setTasks(Array.isArray(result.data) ? result.data : []);
+      } else {
+        console.error(result.message || "タスク一覧の取得に失敗しました。");
+      }
 
-    return { ok: true };
-  };
+      setIsLoading(false);
+    };
 
-  const handleAddTask = ({ title, label, startDate, endDate }) => {
-    const result = validateTaskInput({ title, label, startDate, endDate });
+    load();
+  }, []);
+
+  const handleStatusChange = async (id, nextStatus) => {
+    const result = await updateTaskApi(id, { status: nextStatus });
 
     if (!result.ok) {
       return result;
     }
 
-    const taskData = result.data;
+    setTasks((prev) =>
+      prev.map((task) => (task.id === id ? result.data : task))
+    );
 
-    setTasks((prev) => [
-      {
-        id: Date.now(),
-        title: taskData.title,
-        label: taskData.label,
-        status: "TODO",
-        startDate: taskData.startDate,
-        endDate: taskData.endDate,
-        createdBy: "朝倉悠翔",
-        assignee: "朝倉悠翔",
-        completedAt: null,
-      },
-      ...prev,
-    ]);
-
-    return { ok: true };
+    return { ok: true, data: result.data };
   };
 
-  const handleUpdateTask = ({ id, title, label, startDate, endDate }) => {
-    const result = validateTaskInput({ title, label, startDate, endDate });
+  const handleAddTask = async ({ title, label, startDate, endDate }) => {
+    const validation = validateTaskInput({ title, label, startDate, endDate });
+
+    if (!validation.ok) {
+      return validation;
+    }
+
+    const result = await createTask({
+      title: validation.data.title,
+      label: validation.data.label,
+      startDate: validation.data.startDate,
+      endDate: validation.data.endDate,
+      status: "TODO",
+      createdBy: "朝倉悠翔",
+      assignee: "朝倉悠翔",
+    });
 
     if (!result.ok) {
       return result;
     }
 
-    const taskData = result.data;
+    setTasks((prev) => [result.data, ...prev]);
 
-    setTasks((prev) =>
-      prev.map((task) =>
-        task.id === id
-          ? {
-              ...task,
-              title: taskData.title,
-              label: taskData.label,
-              startDate: taskData.startDate,
-              endDate: taskData.endDate,
-            }
-          : task
-      )
-    );
-
-    return { ok: true };
+    return { ok: true, data: result.data };
   };
 
-  const handleDeleteTask = (id) => {
+  const handleUpdateTask = async ({ id, title, label, startDate, endDate }) => {
+    const validation = validateTaskInput({ title, label, startDate, endDate });
+
+    if (!validation.ok) {
+      return validation;
+    }
+
+    const result = await updateTaskApi(id, {
+      title: validation.data.title,
+      label: validation.data.label,
+      startDate: validation.data.startDate,
+      endDate: validation.data.endDate,
+    });
+
+    if (!result.ok) {
+      return result;
+    }
+
+    setTasks((prev) =>
+      prev.map((task) => (task.id === id ? result.data : task))
+    );
+
+    return { ok: true, data: result.data };
+  };
+
+  const handleDeleteTask = async (id) => {
+    const result = await deleteTaskApi(id);
+
+    if (!result.ok) {
+      return result;
+    }
+
     setTasks((prev) => prev.filter((task) => task.id !== id));
+
     return { ok: true };
   };
 
   return {
     tasks,
     setTasks,
+    isLoading,
     handleStatusChange,
     handleAddTask,
     handleUpdateTask,
