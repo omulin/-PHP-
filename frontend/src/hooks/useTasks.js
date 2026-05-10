@@ -38,23 +38,26 @@ function validateTaskInput({ title, label, startDate, endDate }) {
 export default function useTasks() {
   const [tasks, setTasks] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState("");
+
+  const reloadTasks = async () => {
+    setIsLoading(true);
+    setErrorMessage("");
+
+    const result = await fetchTasks();
+
+    if (result.ok) {
+      setTasks(Array.isArray(result.data) ? result.data : []);
+    } else {
+      setErrorMessage(result.message || "タスク一覧の取得に失敗しました。");
+    }
+
+    setIsLoading(false);
+    return result;
+  };
 
   useEffect(() => {
-    const load = async () => {
-      setIsLoading(true);
-
-      const result = await fetchTasks();
-
-      if (result.ok) {
-        setTasks(Array.isArray(result.data) ? result.data : []);
-      } else {
-        console.error(result.message || "タスク一覧の取得に失敗しました。");
-      }
-
-      setIsLoading(false);
-    };
-
-    load();
+    reloadTasks();
   }, []);
 
   const handleStatusChange = async (id, nextStatus) => {
@@ -138,6 +141,8 @@ export default function useTasks() {
     tasks,
     setTasks,
     isLoading,
+    errorMessage,
+    reloadTasks,
     handleStatusChange,
     handleAddTask,
     handleUpdateTask,

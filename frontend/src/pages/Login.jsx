@@ -1,73 +1,109 @@
+import { useState } from "react";
+import Card from "../components/common/Card";
+import SectionTitle from "../components/common/SectionTitle";
+
 export default function Login({ onLogin }) {
+  const [userId, setUserId] = useState("");
+  const [password, setPassword] = useState("");
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    onLogin();
+  };
+
+  const inputStyle = {
+    width: "100%",
+    boxSizing: "border-box",
+    padding: "12px 14px",
+    borderRadius: "var(--radius-sm, 10px)",
+    border: "1px solid var(--color-border-strong, #d1d5db)",
+    background: "var(--color-bg-card, #ffffff)",
+    color: "var(--color-text-main, #111827)",
+    fontSize: 14,
+    outline: "none",
+  };
+
   return (
     <div
       style={{
         minHeight: "100vh",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        background: "#eef2f7",
-        fontFamily:
-          "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+        display: "grid",
+        placeItems: "center",
+        background: "var(--color-bg-page, #eef2f7)",
+        padding: 16,
       }}
     >
-      <div
-        style={{
-          width: 360,
-          background: "#ffffff",
-          borderRadius: 16,
-          padding: 24,
-          boxShadow: "0 1px 2px rgba(0,0,0,0.04)",
-        }}
-      >
-        <div style={{ fontSize: 28, fontWeight: 800, marginBottom: 20 }}>
-          ログイン
-        </div>
+      <Card style={{ width: "100%", maxWidth: 420, padding: 20 }}>
+        <SectionTitle>ログイン</SectionTitle>
 
-        <input
-          placeholder="メール"
+        <form
+          onSubmit={handleSubmit}
           style={{
-            width: "100%",
-            padding: "14px 12px",
-            borderRadius: 12,
-            border: "1px solid #d1d5db",
-            fontSize: 16,
-            marginBottom: 12,
-            boxSizing: "border-box",
-          }}
-        />
-
-        <input
-          type="password"
-          placeholder="パスワード"
-          style={{
-            width: "100%",
-            padding: "14px 12px",
-            borderRadius: 12,
-            border: "1px solid #d1d5db",
-            fontSize: 16,
-            marginBottom: 16,
-            boxSizing: "border-box",
-          }}
-        />
-
-        <button
-          onClick={onLogin}
-          style={{
-            width: "100%",
-            border: "none",
-            borderRadius: 12,
-            padding: "14px 12px",
-            background: "#4f8fe7",
-            color: "#ffffff",
-            fontWeight: 800,
-            fontSize: 18,
-            cursor: "pointer",
+            display: "grid",
+            gap: 12,
           }}
         >
-          ログイン
-        </button>
-      </div>
+          <div style={{ display: "grid", gap: 6 }}>
+            <label
+              htmlFor="login-user-id"
+              style={{
+                fontSize: 13,
+                fontWeight: 700,
+                color: "var(--color-text-soft, #374151)",
+              }}
+            >
+              ユーザーID
+            </label>
+            <input
+              id="login-user-id"
+              type="text"
+              value={userId}
+              onChange={(e) => setUserId(e.target.value)}
+              placeholder="ユーザーIDを入力"
+              style={inputStyle}
+            />
+          </div>
+
+          <div style={{ display: "grid", gap: 6 }}>
+            <label
+              htmlFor="login-password"
+              style={{
+                fontSize: 13,
+                fontWeight: 700,
+                color: "var(--color-text-soft, #374151)",
+              }}
+            >
+              パスワード
+            </label>
+            <input
+              id="login-password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="パスワードを入力"
+              style={inputStyle}
+            />
+          </div>
+
+          <button
+            type="submit"
+            style={{
+              width: "100%",
+              border: "none",
+              borderRadius: "var(--radius-md, 12px)",
+              padding: "13px 14px",
+              background: "var(--color-primary, #2563eb)",
+              color: "#ffffff",
+              fontWeight: 800,
+              fontSize: 15,
+              cursor: "pointer",
+              marginTop: 4,
+            }}
+          >
+            ログイン
+          </button>
+        </form>
+      </Card>
     </div>
   );
 }

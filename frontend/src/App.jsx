@@ -9,6 +9,7 @@ import TodayTasksCard from "./components/task/TodayTasksCard";
 import BoardCard from "./components/task/BoardCard";
 import HistoryCard from "./components/task/HistoryCard";
 import ScheduleCard from "./components/schedule/ScheduleCard";
+import Card from "./components/common/Card";
 import useTasks from "./hooks/useTasks";
 
 function getDateValue(dateString) {
@@ -28,6 +29,9 @@ export default function App() {
 
   const {
     tasks,
+    isLoading,
+    errorMessage,
+    reloadTasks,
     handleStatusChange: updateTaskStatus,
     handleAddTask: addTask,
     handleUpdateTask: updateTask,
@@ -48,8 +52,8 @@ export default function App() {
     return () => clearTimeout(timer);
   }, [toast]);
 
-  const handleStatusChange = (id, nextStatus) => {
-    const result = updateTaskStatus(id, nextStatus);
+  const handleStatusChange = async (id, nextStatus) => {
+    const result = await updateTaskStatus(id, nextStatus);
 
     if (!result.ok) {
       showToast(result.message || "ステータス更新に失敗しました。", "error");
@@ -60,8 +64,8 @@ export default function App() {
     return result;
   };
 
-  const handleAddTask = ({ title, label, startDate, endDate }) => {
-    const result = addTask({ title, label, startDate, endDate });
+  const handleAddTask = async ({ title, label, startDate, endDate }) => {
+    const result = await addTask({ title, label, startDate, endDate });
 
     if (!result.ok) {
       showToast(result.message || "入力内容を確認してください。", "error");
@@ -80,8 +84,8 @@ export default function App() {
     setEditingTask(null);
   };
 
-  const handleUpdateTask = ({ id, title, label, startDate, endDate }) => {
-    const result = updateTask({ id, title, label, startDate, endDate });
+  const handleUpdateTask = async ({ id, title, label, startDate, endDate }) => {
+    const result = await updateTask({ id, title, label, startDate, endDate });
 
     if (!result.ok) {
       showToast(result.message || "入力内容を確認してください。", "error");
@@ -93,7 +97,7 @@ export default function App() {
     return result;
   };
 
-  const handleDeleteTask = (id) => {
+  const handleDeleteTask = async (id) => {
     const targetTask = tasks.find((task) => task.id === id);
 
     if (!targetTask) {
@@ -107,7 +111,7 @@ export default function App() {
       return { ok: false, canceled: true };
     }
 
-    const result = deleteTask(id);
+    const result = await deleteTask(id);
 
     if (!result.ok) {
       showToast(result.message || "タスク削除に失敗しました。", "error");
@@ -169,6 +173,10 @@ export default function App() {
     return sorted;
   }, [tasks, searchText, statusFilter, sortType]);
 
+  const hasNoTasks = !isLoading && !errorMessage && tasks.length === 0;
+  const hasNoFilteredTasks =
+    !isLoading && !errorMessage && tasks.length > 0 && visibleTasks.length === 0;
+
   if (!isLogin) {
     return <Login onLogin={() => setIsLogin(true)} />;
   }
@@ -215,47 +223,122 @@ export default function App() {
         </div>
       )}
 
-      <MainLayout
-        leftTop={<LeftPanel />}
-        centerTop={
-          <TaskManagerCard
-            onAddTask={handleAddTask}
-            onUpdateTask={handleUpdateTask}
-            editingTask={editingTask}
-            onCancelEdit={handleCancelEdit}
-          />
-        }
-        rightTop={<RightPanel tasks={tasks} />}
-        toolbar={
-          <SearchFilterBar
-            searchText={searchText}
-            onSearchTextChange={setSearchText}
-            statusFilter={statusFilter}
-            onStatusFilterChange={setStatusFilter}
-            sortType={sortType}
-            onSortTypeChange={setSortType}
-            resultCount={visibleTasks.length}
-          />
-        }
-        leftMiddle={
-          <TodayTasksCard
-            tasks={visibleTasks}
-            onChangeStatus={handleStatusChange}
-            onEditTask={handleStartEdit}
-            onDeleteTask={handleDeleteTask}
-          />
-        }
-        centerMiddle={
-          <BoardCard
-            tasks={visibleTasks}
-            onChangeStatus={handleStatusChange}
-            onEditTask={handleStartEdit}
-            onDeleteTask={handleDeleteTask}
-          />
-        }
-        rightMiddle={<ScheduleCard tasks={visibleTasks} />}
-        bottom={<HistoryCard tasks={visibleTasks} />}
-      />
+      <div style={{ display: "grid", gap: 12 }}>
+        {isLoading && (
+          <Card style={{ padding: 14 }}>
+            <div style={{ fontSize: 14, fontWeight: 700, color: "#374151" }}>
+              タスクを読み込み中です...
+            </div>
+          </Card>
+        )}
+
+        {!isLoading && errorMessage && (
+          <Card
+            style={{
+              padding: 14,
+              border: "1px solid #fecaca",
+              background: "#fef2f2",
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                gap: 12,
+                flexWrap: "wrap",
+              }}
+            >
+              <div
+                style={{
+                  fontSize: 14,
+                  fontWeight: 700,
+                  color: "#b91c1c",
+                }}
+              >
+                {errorMessage}
+              </div>
+
+              <button
+                type="button"
+                onClick={reloadTasks}
+                style={{
+                  border: "1px solid #fecaca",
+                  background: "#ffffff",
+                  borderRadius: 10,
+                  padding: "8px 12px",
+                  fontWeight: 700,
+                  fontSize: 12,
+                  cursor: "pointer",
+                  color: "#b91c1c",
+                }}
+              >
+                再読み込み
+              </button>
+            </div>
+          </Card>
+        )}
+
+        {hasNoTasks && (
+          <Card style={{ padding: 14 }}>
+            <div style={{ fontSize: 14, fontWeight: 700, color: "#374151" }}>
+              まだタスクがありません。上のフォームから追加してください。
+            </div>
+          </Card>
+        )}
+
+        {hasNoFilteredTasks && (
+          <Card style={{ padding: 14 }}>
+            <div style={{ fontSize: 14, fontWeight: 700, color: "#374151" }}>
+              条件に一致するタスクがありません。検索条件を見直してください。
+            </div>
+          </Card>
+        )}
+      </div>
+
+      <div style={{ marginTop: 12 }}>
+        <MainLayout
+          leftTop={<LeftPanel />}
+          centerTop={
+            <TaskManagerCard
+              onAddTask={handleAddTask}
+              onUpdateTask={handleUpdateTask}
+              editingTask={editingTask}
+              onCancelEdit={handleCancelEdit}
+            />
+          }
+          rightTop={<RightPanel tasks={tasks} />}
+          toolbar={
+            <SearchFilterBar
+              searchText={searchText}
+              onSearchTextChange={setSearchText}
+              statusFilter={statusFilter}
+              onStatusFilterChange={setStatusFilter}
+              sortType={sortType}
+              onSortTypeChange={setSortType}
+              resultCount={visibleTasks.length}
+            />
+          }
+          leftMiddle={
+            <TodayTasksCard
+              tasks={visibleTasks}
+              onChangeStatus={handleStatusChange}
+              onEditTask={handleStartEdit}
+              onDeleteTask={handleDeleteTask}
+            />
+          }
+          centerMiddle={
+            <BoardCard
+              tasks={visibleTasks}
+              onChangeStatus={handleStatusChange}
+              onEditTask={handleStartEdit}
+              onDeleteTask={handleDeleteTask}
+            />
+          }
+          rightMiddle={<ScheduleCard tasks={visibleTasks} />}
+          bottom={<HistoryCard tasks={visibleTasks} />}
+        />
+      </div>
     </div>
   );
 }
