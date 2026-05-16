@@ -31,6 +31,7 @@ function StatusBadge({ status }) {
             : status === "DOING"
               ? "#1d4ed8"
               : "#374151",
+        flexShrink: 0,
       }}
     >
       {labelMap[status] || "未入力"}
@@ -76,7 +77,15 @@ export default function TodayTasksCard({
           今日の対象タスクはありません
         </div>
       ) : (
-        <div style={{ display: "grid", gap: 10 }}>
+        <div
+          style={{
+            display: "grid",
+            gap: 10,
+            maxHeight: 360,
+            overflowY: "auto",
+            paddingRight: 4,
+          }}
+        >
           {todayTasks.map((task) => (
             <div
               key={task.id}

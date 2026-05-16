@@ -3,15 +3,23 @@ import SectionTitle from "../common/SectionTitle";
 import TaskBox from "./TaskBox";
 import { STATUS_LABELS } from "../../data/dummyTasks";
 
+function getSafeTasks(tasks = []) {
+  if (!Array.isArray(tasks)) return [];
+
+  return tasks.filter((task) => task && typeof task === "object");
+}
+
 export default function BoardCard({
-  tasks,
+  tasks = [],
   onChangeStatus,
   onEditTask,
   onDeleteTask,
 }) {
-  const todoTasks = tasks.filter((t) => t.status === "TODO");
-  const doingTasks = tasks.filter((t) => t.status === "DOING");
-  const doneTasks = tasks.filter((t) => t.status === "DONE");
+  const safeTasks = getSafeTasks(tasks);
+
+  const todoTasks = safeTasks.filter((task) => task.status === "TODO");
+  const doingTasks = safeTasks.filter((task) => task.status === "DOING");
+  const doneTasks = safeTasks.filter((task) => task.status === "DONE");
 
   const columns = [
     {
@@ -32,90 +40,82 @@ export default function BoardCard({
   ];
 
   return (
-    <Card style={{ minHeight: 360 }}>
+    <Card>
+      <SectionTitle>ボード</SectionTitle>
+
       <div
         style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
+          fontSize: 12,
+          color: "#6b7280",
           marginBottom: 12,
-          gap: 10,
-          flexWrap: "wrap",
         }}
       >
-        <SectionTitle>ボード</SectionTitle>
-
-        <button
-          type="button"
-          style={{
-            border: "1px solid #d1d5db",
-            background: "#ffffff",
-            borderRadius: 9,
-            padding: "8px 10px",
-            fontWeight: 700,
-            fontSize: 12,
-            cursor: "pointer",
-          }}
-        >
-          絞り込み
-        </button>
+        絞り込み：自分担当のみ
       </div>
-
-      <label
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 8,
-          fontSize: 13,
-          color: "#374151",
-          marginBottom: 12,
-        }}
-      >
-        <input type="checkbox" />
-        自分担当のみ
-      </label>
 
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "1fr 1fr 1fr",
-          gap: 10,
-          alignItems: "start",
-          minHeight: 250,
+          gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+          gap: 12,
         }}
       >
         {columns.map((column) => (
           <div
             key={column.key}
             style={{
-              background: "#f8fafc",
+              background: "#f9fafb",
               border: "1px solid #e5e7eb",
-              borderRadius: 12,
+              borderRadius: 14,
               padding: 10,
-              minHeight: 240,
+              minWidth: 0,
+              display: "flex",
+              flexDirection: "column",
             }}
           >
             <div
               style={{
                 fontWeight: 800,
-                fontSize: 16,
-                color: "#111827",
-                marginBottom: 8,
-                lineHeight: 1.3,
+                fontSize: 13,
+                marginBottom: 10,
+                color: "#374151",
+                flexShrink: 0,
               }}
             >
               {column.title}
             </div>
 
-            {column.list.map((task) => (
-              <TaskBox
-                key={task.id}
-                task={task}
-                onChangeStatus={onChangeStatus}
-                onEditTask={onEditTask}
-                onDeleteTask={onDeleteTask}
-              />
-            ))}
+            <div
+              style={{
+                display: "grid",
+                gap: 8,
+                maxHeight: 360,
+                overflowY: "auto",
+                paddingRight: 4,
+              }}
+            >
+              {column.list.length === 0 ? (
+                <div
+                  style={{
+                    fontSize: 12,
+                    color: "#9ca3af",
+                    padding: "8px 0",
+                  }}
+                >
+                  タスクなし
+                </div>
+              ) : (
+                column.list.map((task) => (
+                  <TaskBox
+                    key={task.id}
+                    task={task}
+                    onChangeStatus={onChangeStatus}
+                    onEditTask={onEditTask}
+                    onDeleteTask={onDeleteTask}
+                  />
+                ))
+              )}
+            </div>
           </div>
         ))}
       </div>
