@@ -109,3 +109,48 @@ export function formatDateRange(startDate, endDate) {
 
   return `${startDate} 〜 ${endDate}`;
 }
+
+export function getHistoryTasks(tasks = []) {
+  const safeTasks = Array.isArray(tasks)
+    ? tasks.filter((task) => task && typeof task === "object")
+    : [];
+
+  return safeTasks
+    .filter((task) => task.status === "DONE")
+    .sort((a, b) => {
+      const aTime = new Date(a.completedAt || a.endDate || a.updatedAt || 0).getTime();
+      const bTime = new Date(b.completedAt || b.endDate || b.updatedAt || 0).getTime();
+
+      return bTime - aTime;
+    });
+}
+
+export function getCompletedTodayCount(tasks = []) {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const tomorrow = new Date(today);
+  tomorrow.setDate(today.getDate() + 1);
+
+  return getHistoryTasks(tasks).filter((task) => {
+    if (!task.completedAt) return false;
+
+    const completedDate = new Date(task.completedAt);
+
+    return completedDate >= today && completedDate < tomorrow;
+  }).length;
+}
+
+export function getCompletedThisMonthCount(tasks = []) {
+  const now = new Date();
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  const startOfNextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+
+  return getHistoryTasks(tasks).filter((task) => {
+    if (!task.completedAt) return false;
+
+    const completedDate = new Date(task.completedAt);
+
+    return completedDate >= startOfMonth && completedDate < startOfNextMonth;
+  }).length;
+}
