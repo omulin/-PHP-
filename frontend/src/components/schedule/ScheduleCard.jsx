@@ -1,442 +1,559 @@
 import { useMemo, useState } from "react";
 import Card from "../common/Card";
 import SectionTitle from "../common/SectionTitle";
-import SmallTab from "../common/SmallTab";
 
-function parseDate(dateString) {
+const STATUS_LABELS = {
+  TODO: "未入力",
+  DOING: "進行中",
+  DONE: "完了",
+};
+
+function getSafeTasks(tasks = []) {
+  if (!Array.isArray(tasks)) return [];
+
+  return tasks.filter((task) => task && typeof task === "object");
+}
+
+function toLocalDate(dateString) {
   if (!dateString) return null;
 
-  const [year, month, day] = dateString.split("-").map(Number);
+  const [year, month, day] = String(dateString).split("-").map(Number);
+
   if (!year || !month || !day) return null;
 
-  return new Date(year, month - 1, day);
+  const date = new Date(year, month - 1, day);
+  date.setHours(0, 0, 0, 0);
+
+  return date;
 }
 
-function formatDate(date) {
-  const month = date.getMonth() + 1;
-  const day = date.getDate();
-  return `${month}/${day}`;
+function getToday() {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  return today;
 }
 
-function getWeekdayLabel(date) {
-  const labels = ["日", "月", "火", "水", "木", "金", "土"];
-  return labels[date.getDay()];
-}
+function getWeekStart(date) {
+  const base = new Date(date);
+  base.setHours(0, 0, 0, 0);
 
-function formatDateRange(start, end) {
-  return `${formatDate(start)} 〜 ${formatDate(end)}`;
+  const day = base.getDay();
+  const diff = day === 0 ? -6 : 1 - day;
+
+  base.setDate(base.getDate() + diff);
+
+  return base;
 }
 
 function addDays(date, days) {
   const next = new Date(date);
   next.setDate(next.getDate() + days);
+  next.setHours(0, 0, 0, 0);
+
   return next;
 }
 
-function addMonths(date, months) {
-  const next = new Date(date);
-  next.setMonth(next.getMonth() + months);
-  return next;
+function getDaysFrom(startDate, count) {
+  return Array.from({ length: count }, (_, index) => addDays(startDate, index));
 }
 
-function startOfWeek(date) {
-  const target = new Date(date);
-  const day = target.getDay();
-  const diff = day === 0 ? -6 : 1 - day;
-  target.setDate(target.getDate() + diff);
-  target.setHours(0, 0, 0, 0);
-  return target;
+function formatShortDate(date) {
+  if (!date) return "-";
+
+  return `${date.getMonth() + 1}/${date.getDate()}`;
 }
 
-function endOfWeek(date) {
-  return addDays(startOfWeek(date), 13);
+function formatDayLabel(date) {
+  const weekLabels = ["日", "月", "火", "水", "木", "金", "土"];
+
+  return `${date.getMonth() + 1}/${date.getDate()} (${weekLabels[date.getDay()]})`;
 }
 
-function startOfMonth(date) {
-  return new Date(date.getFullYear(), date.getMonth(), 1);
+function formatDateRange(startDate, endDate) {
+  if (!startDate && !endDate) return "-";
+  if (!startDate) return endDate;
+  if (!endDate) return startDate;
+
+  return `${startDate} 〜 ${endDate}`;
 }
 
-function isSameDay(a, b) {
-  return (
-    a.getFullYear() === b.getFullYear() &&
-    a.getMonth() === b.getMonth() &&
-    a.getDate() === b.getDate()
-  );
-}
+function getTaskDateInfo(task) {
+  const start = toLocalDate(task.startDate);
+  const end = toLocalDate(task.endDate);
 
-function getTaskBar(taskStart, taskEnd, rangeStart, rangeEnd) {
-  const msPerDay = 1000 * 60 * 60 * 24;
-
-  const start = taskStart < rangeStart ? rangeStart : taskStart;
-  const end = taskEnd > rangeEnd ? rangeEnd : taskEnd;
-
-  if (end < rangeStart || start > rangeEnd) return null;
-
-  const offsetDays = Math.floor((start - rangeStart) / msPerDay);
-  const durationDays = Math.floor((end - start) / msPerDay) + 1;
-  const totalDays = Math.floor((rangeEnd - rangeStart) / msPerDay) + 1;
+  if (!start || !end) return null;
 
   return {
-    left: `${(offsetDays / totalDays) * 100}%`,
-    width: `${(durationDays / totalDays) * 100}%`,
+    start,
+    end,
   };
 }
 
-const primaryButtonStyle = {
-  border: "none",
-  borderRadius: 9,
-  background: "#2563eb",
-  color: "#fff",
-  padding: "8px 10px",
-  fontWeight: 800,
-  fontSize: 12,
-  cursor: "pointer",
-  minWidth: 64,
-};
+function isTaskInRange(task, rangeStart, rangeEnd) {
+  const dateInfo = getTaskDateInfo(task);
 
-export default function ScheduleCard({ tasks = [] }) {
-  const [view, setView] = useState("gantt");
-  const [weekOffset, setWeekOffset] = useState(0);
-  const [monthOffset, setMonthOffset] = useState(0);
+  if (!dateInfo) return false;
 
-  const today = useMemo(() => {
-    const now = new Date();
-    return new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  }, []);
+  return dateInfo.start <= rangeEnd && dateInfo.end >= rangeStart;
+}
 
-  const datedTasks = useMemo(() => {
-    return tasks
-      .map((task) => {
-        const start = parseDate(task.startDate);
-        const end = parseDate(task.endDate);
+function getOffsetDays(baseDate, targetDate) {
+  const oneDay = 1000 * 60 * 60 * 24;
 
-        if (!start || !end) return null;
+  return Math.round((targetDate - baseDate) / oneDay);
+}
 
-        return {
-          ...task,
-          start,
-          end,
-        };
-      })
-      .filter(Boolean)
-      .sort((a, b) => a.start - b.start);
-  }, [tasks]);
+function StatusBadge({ status }) {
+  return (
+    <span
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        borderRadius: 999,
+        padding: "3px 8px",
+        fontSize: 11,
+        fontWeight: 800,
+        background:
+          status === "DONE"
+            ? "#dcfce7"
+            : status === "DOING"
+              ? "#dbeafe"
+              : "#f3f4f6",
+        color:
+          status === "DONE"
+            ? "#166534"
+            : status === "DOING"
+              ? "#1d4ed8"
+              : "#374151",
+        flexShrink: 0,
+      }}
+    >
+      {STATUS_LABELS[status] || "未入力"}
+    </span>
+  );
+}
 
-  const ganttStart = addDays(startOfWeek(today), weekOffset * 7);
-  const ganttEnd = endOfWeek(ganttStart);
+function ToolbarButton({ active = false, children, onClick }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      style={{
+        border: active ? "1px solid #2563eb" : "1px solid #d1d5db",
+        background: active ? "#eff6ff" : "#ffffff",
+        color: active ? "#1d4ed8" : "#374151",
+        borderRadius: 999,
+        padding: "7px 10px",
+        fontSize: 12,
+        fontWeight: 800,
+        cursor: "pointer",
+      }}
+    >
+      {children}
+    </button>
+  );
+}
 
-  const ganttDays = useMemo(() => {
-    return Array.from({ length: 14 }).map((_, index) => addDays(ganttStart, index));
-  }, [ganttStart]);
+function GanttRow({ task, timelineStart, timelineEnd, totalDays }) {
+  const dateInfo = getTaskDateInfo(task);
 
-  const visibleGanttTasks = datedTasks.filter(
-    (task) => task.end >= ganttStart && task.start <= ganttEnd
+  if (!dateInfo) {
+    return (
+      <div
+        style={{
+          border: "1px solid #e5e7eb",
+          borderRadius: 12,
+          padding: 10,
+          background: "#ffffff",
+        }}
+      >
+        <div
+          style={{
+            fontWeight: 800,
+            fontSize: 13,
+            color: "#111827",
+          }}
+        >
+          {task.title || "無題のタスク"}
+        </div>
+
+        <div
+          style={{
+            fontSize: 12,
+            color: "#ef4444",
+            marginTop: 4,
+          }}
+        >
+          日付が未設定です
+        </div>
+      </div>
+    );
+  }
+
+  const clampedStart = dateInfo.start < timelineStart ? timelineStart : dateInfo.start;
+  const clampedEnd = dateInfo.end > timelineEnd ? timelineEnd : dateInfo.end;
+
+  const startOffset = Math.max(0, getOffsetDays(timelineStart, clampedStart));
+  const endOffset = Math.min(
+    totalDays - 1,
+    getOffsetDays(timelineStart, clampedEnd)
   );
 
-  const currentMonthDate = addMonths(startOfMonth(today), monthOffset);
-  const monthStart = startOfMonth(currentMonthDate);
-  const firstGridDate = addDays(monthStart, -(monthStart.getDay() || 7) + 1);
-
-  const calendarDays = Array.from({ length: 35 }).map((_, index) =>
-    addDays(firstGridDate, index)
-  );
+  const length = Math.max(1, endOffset - startOffset + 1);
 
   return (
-    <Card style={{ minHeight: 360 }}>
-      <div style={{ display: "flex", gap: 8, marginBottom: 12, flexWrap: "wrap" }}>
-        <SmallTab active={view === "gantt"} onClick={() => setView("gantt")}>
-          ガント
-        </SmallTab>
-        <SmallTab active={view === "calendar"} onClick={() => setView("calendar")}>
-          カレンダー
-        </SmallTab>
-      </div>
-
-      {view === "gantt" ? (
-        <>
+    <div
+      style={{
+        display: "grid",
+        gridTemplateColumns: "160px minmax(0, 1fr)",
+        gap: 10,
+        alignItems: "center",
+        border: "1px solid #e5e7eb",
+        borderRadius: 12,
+        padding: 10,
+        background: "#ffffff",
+      }}
+    >
+      <div style={{ minWidth: 0 }}>
+        <div
+          style={{
+            display: "flex",
+            gap: 6,
+            alignItems: "center",
+            minWidth: 0,
+            marginBottom: 4,
+          }}
+        >
           <div
             style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
+              fontWeight: 900,
+              fontSize: 13,
+              color: "#111827",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+              minWidth: 0,
+            }}
+          >
+            {task.title || "無題のタスク"}
+          </div>
+        </div>
+
+        <div
+          style={{
+            fontSize: 11,
+            color: "#6b7280",
+            marginBottom: 5,
+          }}
+        >
+          {formatDateRange(task.startDate, task.endDate)}
+        </div>
+
+        <StatusBadge status={task.status} />
+      </div>
+
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: `repeat(${totalDays}, minmax(18px, 1fr))`,
+          gap: 2,
+          alignItems: "center",
+          minWidth: 0,
+        }}
+      >
+        <div
+          style={{
+            gridColumn: `${startOffset + 1} / span ${length}`,
+            height: 18,
+            borderRadius: 999,
+            background:
+              task.status === "DONE"
+                ? "#22c55e"
+                : task.status === "DOING"
+                  ? "#3b82f6"
+                  : "#9ca3af",
+          }}
+          title={`${task.title}：${formatDateRange(task.startDate, task.endDate)}`}
+        />
+      </div>
+    </div>
+  );
+}
+
+function CalendarDay({ date, tasks }) {
+  const today = getToday();
+  const isToday = date.getTime() === today.getTime();
+
+  const dayTasks = tasks.filter((task) => {
+    const dateInfo = getTaskDateInfo(task);
+
+    if (!dateInfo) return false;
+
+    return dateInfo.start <= date && date <= dateInfo.end;
+  });
+
+  return (
+    <div
+      style={{
+        border: isToday ? "2px solid #2563eb" : "1px solid #e5e7eb",
+        borderRadius: 12,
+        padding: 10,
+        background: isToday ? "#eff6ff" : "#ffffff",
+        minHeight: 130,
+        minWidth: 0,
+      }}
+    >
+      <div
+        style={{
+          fontWeight: 900,
+          fontSize: 13,
+          color: isToday ? "#1d4ed8" : "#111827",
+          marginBottom: 8,
+        }}
+      >
+        {formatDayLabel(date)}
+      </div>
+
+      {dayTasks.length === 0 ? (
+        <div
+          style={{
+            fontSize: 12,
+            color: "#9ca3af",
+          }}
+        >
+          予定なし
+        </div>
+      ) : (
+        <div
+          style={{
+            display: "grid",
+            gap: 6,
+            maxHeight: 120,
+            overflowY: "auto",
+            paddingRight: 3,
+          }}
+        >
+          {dayTasks.map((task) => (
+            <div
+              key={task.id}
+              style={{
+                borderRadius: 8,
+                padding: "6px 7px",
+                background:
+                  task.status === "DONE"
+                    ? "#dcfce7"
+                    : task.status === "DOING"
+                      ? "#dbeafe"
+                      : "#f3f4f6",
+                fontSize: 11,
+                fontWeight: 800,
+                color:
+                  task.status === "DONE"
+                    ? "#166534"
+                    : task.status === "DOING"
+                      ? "#1d4ed8"
+                      : "#374151",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+              }}
+              title={task.title}
+            >
+              {task.title || "無題"}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default function ScheduleCard({ tasks = [] }) {
+  const [viewMode, setViewMode] = useState("gantt");
+  const [weekStart, setWeekStart] = useState(() => getWeekStart(getToday()));
+
+  const safeTasks = useMemo(() => getSafeTasks(tasks), [tasks]);
+
+  const timelineDays = useMemo(() => getDaysFrom(weekStart, 14), [weekStart]);
+  const calendarDays = useMemo(() => getDaysFrom(weekStart, 7), [weekStart]);
+
+  const timelineStart = timelineDays[0];
+  const timelineEnd = timelineDays[timelineDays.length - 1];
+  const calendarEnd = calendarDays[calendarDays.length - 1];
+
+  const visibleTasks = useMemo(() => {
+    const rangeEnd = viewMode === "gantt" ? timelineEnd : calendarEnd;
+
+    return safeTasks
+      .filter((task) => task.startDate && task.endDate)
+      .filter((task) => isTaskInRange(task, weekStart, rangeEnd))
+      .sort((a, b) => {
+        const aStart = toLocalDate(a.startDate);
+        const bStart = toLocalDate(b.startDate);
+
+        if (!aStart || !bStart) return 0;
+
+        return aStart - bStart;
+      });
+  }, [safeTasks, weekStart, timelineEnd, calendarEnd, viewMode]);
+
+  const handlePrevWeek = () => {
+    setWeekStart((prev) => addDays(prev, -7));
+  };
+
+  const handleNextWeek = () => {
+    setWeekStart((prev) => addDays(prev, 7));
+  };
+
+  const handleCurrentWeek = () => {
+    setWeekStart(getWeekStart(getToday()));
+  };
+
+  return (
+    <Card>
+      <SectionTitle>スケジュール</SectionTitle>
+
+      <div
+        style={{
+          display: "flex",
+          gap: 8,
+          flexWrap: "wrap",
+          alignItems: "center",
+          marginBottom: 12,
+        }}
+      >
+        <ToolbarButton
+          active={viewMode === "gantt"}
+          onClick={() => setViewMode("gantt")}
+        >
+          ガント
+        </ToolbarButton>
+
+        <ToolbarButton
+          active={viewMode === "calendar"}
+          onClick={() => setViewMode("calendar")}
+        >
+          7日カレンダー
+        </ToolbarButton>
+
+        <div
+          style={{
+            width: 1,
+            height: 24,
+            background: "#e5e7eb",
+            margin: "0 2px",
+          }}
+        />
+
+        <ToolbarButton onClick={handlePrevWeek}>前週</ToolbarButton>
+        <ToolbarButton onClick={handleCurrentWeek}>現在</ToolbarButton>
+        <ToolbarButton onClick={handleNextWeek}>次週</ToolbarButton>
+
+        <div
+          style={{
+            fontSize: 12,
+            fontWeight: 800,
+            color: "#6b7280",
+            marginLeft: 2,
+          }}
+        >
+          {formatShortDate(weekStart)} 〜{" "}
+          {formatShortDate(viewMode === "gantt" ? timelineEnd : calendarEnd)}
+          ・対象 {visibleTasks.length}件
+        </div>
+      </div>
+
+      {visibleTasks.length === 0 ? (
+        <div
+          style={{
+            fontSize: 13,
+            color: "#6b7280",
+            padding: "10px 0",
+          }}
+        >
+          この期間に表示できるタスクはありません
+        </div>
+      ) : viewMode === "gantt" ? (
+        <div>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "160px minmax(0, 1fr)",
               gap: 10,
-              flexWrap: "wrap",
-              marginBottom: 12,
+              alignItems: "center",
+              marginBottom: 8,
+              padding: "0 10px",
             }}
           >
             <div
               style={{
+                fontSize: 12,
                 fontWeight: 800,
-                fontSize: 16,
-                color: "#111827",
-                whiteSpace: "nowrap",
+                color: "#6b7280",
               }}
             >
-              {formatDateRange(ganttStart, ganttEnd)}
+              タスク
             </div>
-
-            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-              <button type="button" onClick={() => setWeekOffset((prev) => prev - 1)} style={primaryButtonStyle}>
-                前週
-              </button>
-              <button type="button" onClick={() => setWeekOffset(0)} style={primaryButtonStyle}>
-                今週
-              </button>
-              <button type="button" onClick={() => setWeekOffset((prev) => prev + 1)} style={primaryButtonStyle}>
-                次週
-              </button>
-            </div>
-          </div>
-
-          <SectionTitle>ガント（2週間）</SectionTitle>
-
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "88px 1fr",
-              gap: 10,
-              alignItems: "end",
-              marginBottom: 10,
-            }}
-          >
-            <div />
 
             <div
               style={{
                 display: "grid",
-                gridTemplateColumns: "repeat(14, 1fr)",
-                border: "1px solid #e5e7eb",
-                borderRadius: 10,
-                overflow: "hidden",
-                background: "#ffffff",
+                gridTemplateColumns: `repeat(${timelineDays.length}, minmax(18px, 1fr))`,
+                gap: 2,
+                minWidth: 0,
               }}
             >
-              {ganttDays.map((date, index) => (
+              {timelineDays.map((day) => (
                 <div
-                  key={date.toISOString()}
+                  key={day.toISOString()}
                   style={{
-                    padding: "6px 2px",
+                    fontSize: 10,
+                    color: "#6b7280",
                     textAlign: "center",
-                    borderRight: index === 13 ? "none" : "1px solid #e5e7eb",
-                    background: isSameDay(date, today) ? "#dbeafe" : "#f8fafc",
+                    whiteSpace: "nowrap",
                   }}
                 >
-                  <div
-                    style={{
-                      fontSize: 10,
-                      fontWeight: 700,
-                      color: "#111827",
-                      lineHeight: 1.2,
-                    }}
-                  >
-                    {formatDate(date)}
-                  </div>
-                  <div
-                    style={{
-                      marginTop: 2,
-                      fontSize: 9,
-                      color: "#6b7280",
-                      lineHeight: 1.2,
-                    }}
-                  >
-                    {getWeekdayLabel(date)}
-                  </div>
+                  {formatShortDate(day)}
                 </div>
               ))}
             </div>
           </div>
 
-          {visibleGanttTasks.length === 0 ? (
-            <div
-              style={{
-                padding: 14,
-                borderRadius: 12,
-                background: "#f8fafc",
-                border: "1px solid #e5e7eb",
-                color: "#6b7280",
-                fontSize: 13,
-              }}
-            >
-              この期間に表示できるタスクはありません
-            </div>
-          ) : (
-            <div style={{ display: "grid", gap: 10 }}>
-              {visibleGanttTasks.map((task) => {
-                const bar = getTaskBar(task.start, task.end, ganttStart, ganttEnd);
-
-                return (
-                  <div
-                    key={task.id}
-                    style={{
-                      display: "grid",
-                      gridTemplateColumns: "88px 1fr",
-                      gap: 10,
-                      alignItems: "center",
-                    }}
-                  >
-                    <div
-                      style={{
-                        fontSize: 12,
-                        fontWeight: 700,
-                        color: "#374151",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        whiteSpace: "nowrap",
-                      }}
-                      title={task.title}
-                    >
-                      {task.title}
-                    </div>
-
-                    <div
-                      style={{
-                        position: "relative",
-                        height: 28,
-                        borderRadius: 10,
-                        border: "1px solid #e5e7eb",
-                        overflow: "hidden",
-                        background:
-                          "repeating-linear-gradient(to right, #f8fafc 0%, #f8fafc calc(100% / 14 - 1px), #e5e7eb calc(100% / 14 - 1px), #e5e7eb calc(100% / 14))",
-                      }}
-                    >
-                      {bar && (
-                        <div
-                          style={{
-                            position: "absolute",
-                            left: bar.left,
-                            width: bar.width,
-                            top: 6,
-                            height: 16,
-                            background: "#2563eb",
-                            borderRadius: 999,
-                          }}
-                          title={`${task.title} (${task.startDate} 〜 ${task.endDate})`}
-                        />
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </>
-      ) : (
-        <>
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              gap: 10,
-              flexWrap: "wrap",
-              marginBottom: 12,
-            }}
-          >
-            <SectionTitle>
-              {currentMonthDate.getFullYear()}年 {currentMonthDate.getMonth() + 1}月
-            </SectionTitle>
-
-            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-              <button type="button" onClick={() => setMonthOffset((prev) => prev - 1)} style={primaryButtonStyle}>
-                前月
-              </button>
-              <button type="button" onClick={() => setMonthOffset(0)} style={primaryButtonStyle}>
-                今月
-              </button>
-              <button type="button" onClick={() => setMonthOffset((prev) => prev + 1)} style={primaryButtonStyle}>
-                次月
-              </button>
-            </div>
-          </div>
-
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "repeat(7, 1fr)",
               gap: 8,
+              maxHeight: 380,
+              overflowY: "auto",
+              paddingRight: 4,
             }}
           >
-            {["月", "火", "水", "木", "金", "土", "日"].map((day) => (
-              <div
-                key={day}
-                style={{
-                  textAlign: "center",
-                  fontWeight: 800,
-                  padding: 6,
-                  fontSize: 12,
-                  color: "#6b7280",
-                }}
-              >
-                {day}
-              </div>
+            {visibleTasks.map((task) => (
+              <GanttRow
+                key={task.id}
+                task={task}
+                timelineStart={timelineStart}
+                timelineEnd={timelineEnd}
+                totalDays={timelineDays.length}
+              />
             ))}
-
-            {calendarDays.map((date) => {
-              const dayTasks = datedTasks.filter((task) => isSameDay(task.end, date));
-              const isCurrentMonth = date.getMonth() === currentMonthDate.getMonth();
-              const isToday = isSameDay(date, today);
-
-              return (
-                <div
-                  key={date.toISOString()}
-                  style={{
-                    minHeight: 76,
-                    background: isToday ? "#dbeafe" : isCurrentMonth ? "#f8fafc" : "#f3f4f6",
-                    border: "1px solid #e5e7eb",
-                    borderRadius: 10,
-                    padding: 6,
-                    fontSize: 11,
-                    color: "#374151",
-                  }}
-                >
-                  <div
-                    style={{
-                      fontWeight: 700,
-                      marginBottom: 4,
-                      color: isCurrentMonth ? "#111827" : "#9ca3af",
-                    }}
-                  >
-                    {date.getDate()}
-                  </div>
-
-                  <div style={{ display: "grid", gap: 4 }}>
-                    {dayTasks.slice(0, 2).map((task) => (
-                      <div
-                        key={task.id}
-                        style={{
-                          background: "#ffffff",
-                          color: "#1d4ed8",
-                          borderRadius: 8,
-                          padding: "3px 5px",
-                          fontSize: 10,
-                          fontWeight: 700,
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
-                          whiteSpace: "nowrap",
-                        }}
-                        title={task.title}
-                      >
-                        {task.title}
-                      </div>
-                    ))}
-
-                    {dayTasks.length > 2 && (
-                      <div
-                        style={{
-                          fontSize: 10,
-                          color: "#6b7280",
-                          fontWeight: 700,
-                        }}
-                      >
-                        +{dayTasks.length - 2}件
-                      </div>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
           </div>
-        </>
+        </div>
+      ) : (
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(7, minmax(140px, 1fr))",
+            gap: 8,
+            overflowX: "auto",
+            paddingBottom: 4,
+          }}
+        >
+          {calendarDays.map((day) => (
+            <CalendarDay key={day.toISOString()} date={day} tasks={visibleTasks} />
+          ))}
+        </div>
       )}
     </Card>
   );
