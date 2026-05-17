@@ -5,6 +5,8 @@ import {
   getStatusCounts,
   getTotalCount,
   getDueSoonCount,
+  getCompletedTodayCount,
+  getCompletedThisMonthCount,
 } from "../../utils/taskHelpers";
 
 function StatRow({ label, value, muted = false, borderTop = false }) {
@@ -15,7 +17,7 @@ function StatRow({ label, value, muted = false, borderTop = false }) {
         justifyContent: "space-between",
         fontSize: 14,
         color: muted ? "#6b7280" : "#374151",
-        paddingTop: borderTop ? 6 : 0,
+        paddingTop: borderTop ? 8 : 0,
         borderTop: borderTop ? "1px solid #e5e7eb" : "none",
       }}
     >
@@ -30,6 +32,8 @@ export default function RightPanel({ tasks = [] }) {
   const counts = getStatusCounts(tasks);
   const totalCount = getTotalCount(tasks);
   const dueSoonCount = getDueSoonCount(tasks);
+  const completedTodayCount = getCompletedTodayCount(tasks);
+  const completedThisMonthCount = getCompletedThisMonthCount(tasks);
 
   return (
     <Card>
@@ -45,6 +49,16 @@ export default function RightPanel({ tasks = [] }) {
         }}
       >
         {progress}%
+      </div>
+
+      <div
+        style={{
+          fontSize: 12,
+          color: "#6b7280",
+          marginBottom: 8,
+        }}
+      >
+        完了率
       </div>
 
       <div
@@ -72,6 +86,8 @@ export default function RightPanel({ tasks = [] }) {
         <StatRow label="進行中" value={counts.doing} />
         <StatRow label="完了" value={counts.done} />
         <StatRow label="期限が近い" value={dueSoonCount} muted borderTop />
+        <StatRow label="今日完了" value={completedTodayCount} muted />
+        <StatRow label="今月完了" value={completedThisMonthCount} muted />
       </div>
     </Card>
   );
