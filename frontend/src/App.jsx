@@ -27,10 +27,14 @@ function getSafeTasks(tasks = []) {
   return tasks.filter((task) => task && typeof task === "object");
 }
 
+function getSafeUsers(users = []) {
+  if (!Array.isArray(users)) return [];
+
+  return users.filter((user) => user && typeof user === "object");
+}
+
 function UserSummaryCard({ users = [], isLoading = false }) {
-  const safeUsers = Array.isArray(users)
-    ? users.filter((user) => user && typeof user === "object")
-    : [];
+  const safeUsers = getSafeUsers(users);
 
   const counts = safeUsers.reduce(
     (acc, user) => {
@@ -117,7 +121,7 @@ function UserInfoCard() {
         }}
       >
         ここでは簡易ユーザー登録を行います。名前・メールアドレス・役割を登録し、
-        今後タスクの担当者選択に使えるようにします。
+        タスク作成時の担当者選択に使えるようにします。
       </div>
     </Card>
   );
@@ -143,15 +147,9 @@ export default function App() {
     handleDeleteTask: deleteTask,
   } = useTasks();
 
-  const {
-    users,
-    isUsersLoading,
-    userErrorMessage,
-    reloadUsers,
-    handleAddUser: addUser,
-    handleUpdateUser: updateUser,
-    handleDeleteUser: deleteUser,
-  } = useUsers();
+  const userActions = useUsers();
+
+  const { users, isUsersLoading, userErrorMessage, reloadUsers } = userActions;
 
   const showToast = (message, type = "default") => {
     setToast({ message, type });
@@ -187,8 +185,20 @@ export default function App() {
     return result;
   };
 
-  const handleAddTask = async ({ title, label, startDate, endDate }) => {
-    const result = await addTask({ title, label, startDate, endDate });
+  const handleAddTask = async ({
+    title,
+    label,
+    startDate,
+    endDate,
+    assignee,
+  }) => {
+    const result = await addTask({
+      title,
+      label,
+      startDate,
+      endDate,
+      assignee,
+    });
 
     if (!result.ok) {
       showToast(result.message || "入力内容を確認してください。", "error");
@@ -207,8 +217,22 @@ export default function App() {
     setEditingTask(null);
   };
 
-  const handleUpdateTask = async ({ id, title, label, startDate, endDate }) => {
-    const result = await updateTask({ id, title, label, startDate, endDate });
+  const handleUpdateTask = async ({
+    id,
+    title,
+    label,
+    startDate,
+    endDate,
+    assignee,
+  }) => {
+    const result = await updateTask({
+      id,
+      title,
+      label,
+      startDate,
+      endDate,
+      assignee,
+    });
 
     if (!result.ok) {
       showToast(result.message || "入力内容を確認してください。", "error");
@@ -252,7 +276,7 @@ export default function App() {
   };
 
   const handleAddUser = async (userData) => {
-    const result = await addUser(userData);
+    const result = await userActions.handleAddUser(userData);
 
     if (!result.ok) {
       showToast(result.message || "ユーザー追加に失敗しました。", "error");
@@ -264,7 +288,7 @@ export default function App() {
   };
 
   const handleUpdateUser = async (id, userData) => {
-    const result = await updateUser(id, userData);
+    const result = await userActions.handleUpdateUser(id, userData);
 
     if (!result.ok) {
       showToast(result.message || "ユーザー更新に失敗しました。", "error");
@@ -276,7 +300,7 @@ export default function App() {
   };
 
   const handleDeleteUser = async (id) => {
-    const result = await deleteUser(id);
+    const result = await userActions.handleDeleteUser(id);
 
     if (!result.ok) {
       showToast(result.message || "ユーザー削除に失敗しました。", "error");
@@ -354,6 +378,7 @@ export default function App() {
   const taskLayout = {
     centerTop: (
       <TaskManagerCard
+        users={users}
         onAddTask={handleAddTask}
         onUpdateTask={handleUpdateTask}
         editingTask={editingTask}
@@ -441,14 +466,14 @@ export default function App() {
               toast.type === "add"
                 ? "#2563eb"
                 : toast.type === "delete"
-                ? "#dc2626"
-                : toast.type === "success"
-                ? "#16a34a"
-                : toast.type === "update"
-                ? "#2563eb"
-                : toast.type === "error"
-                ? "#b91c1c"
-                : "#111827",
+                  ? "#dc2626"
+                  : toast.type === "success"
+                    ? "#16a34a"
+                    : toast.type === "update"
+                      ? "#2563eb"
+                      : toast.type === "error"
+                        ? "#b91c1c"
+                        : "#111827",
           }}
         >
           {toast.message}

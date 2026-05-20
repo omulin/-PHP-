@@ -11,7 +11,20 @@ async function request(url, options = {}) {
       ...options,
     });
 
-    const data = await response.json().catch(() => null);
+    const text = await response.text();
+
+    let data = null;
+
+    try {
+      data = text ? JSON.parse(text) : null;
+    } catch {
+      return {
+        ok: false,
+        message:
+          "Laravel APIからJSON以外のレスポンスが返っています。API URLを確認してください。",
+        raw: text,
+      };
+    }
 
     if (!response.ok) {
       return {

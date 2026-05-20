@@ -118,21 +118,6 @@ export default function useUsers() {
   const [isUsersLoading, setIsUsersLoading] = useState(true);
   const [userErrorMessage, setUserErrorMessage] = useState("");
 
-  async function loadInitialUsers() {
-    const result = await fetchUsers();
-
-    if (!result.ok) {
-      setUserErrorMessage(result.message || "ユーザー一覧の取得に失敗しました。");
-      setIsUsersLoading(false);
-      return result;
-    }
-
-    setUsers(getUsersFromResponse(result.data));
-    setIsUsersLoading(false);
-
-    return result;
-  }
-
   async function reloadUsers() {
     setIsUsersLoading(true);
     setUserErrorMessage("");
@@ -254,6 +239,9 @@ export default function useUsers() {
     let ignore = false;
 
     async function run() {
+      setIsUsersLoading(true);
+      setUserErrorMessage("");
+
       const result = await fetchUsers();
 
       if (ignore) return;
@@ -280,8 +268,16 @@ export default function useUsers() {
     isUsersLoading,
     userErrorMessage,
     reloadUsers,
+
+    // 正式名
     handleAddUser,
     handleUpdateUser,
     handleDeleteUser,
+
+    // App.jsx側の名前ズレ対策
+    addUser: handleAddUser,
+    updateUser: handleUpdateUser,
+    removeUser: handleDeleteUser,
+    deleteUser: handleDeleteUser,
   };
 }

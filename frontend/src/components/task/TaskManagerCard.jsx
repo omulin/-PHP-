@@ -1,18 +1,29 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Card from "../common/Card";
 import SectionTitle from "../common/SectionTitle";
 import SmallTab from "../common/SmallTab";
 
+function getSafeUsers(users = []) {
+  if (!Array.isArray(users)) return [];
+
+  return users.filter((user) => user && typeof user === "object");
+}
+
 export default function TaskManagerCard({
+  users = [],
   onAddTask,
   onUpdateTask,
   editingTask,
   onCancelEdit,
 }) {
+  const safeUsers = useMemo(() => getSafeUsers(users), [users]);
+  const defaultAssignee = safeUsers[0]?.name || "朝倉悠翔";
+
   const [title, setTitle] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [label, setLabel] = useState("");
+  const [assignee, setAssignee] = useState(defaultAssignee);
   const [formError, setFormError] = useState("");
 
   useEffect(() => {
@@ -21,15 +32,17 @@ export default function TaskManagerCard({
       setStartDate(editingTask.startDate || "");
       setEndDate(editingTask.endDate || "");
       setLabel(editingTask.label || "");
+      setAssignee(editingTask.assignee || defaultAssignee);
     } else {
       setTitle("");
       setStartDate("");
       setEndDate("");
       setLabel("");
+      setAssignee(defaultAssignee);
     }
 
     setFormError("");
-  }, [editingTask]);
+  }, [editingTask, defaultAssignee]);
 
   const handleSubmit = async () => {
     const taskData = {
@@ -37,6 +50,7 @@ export default function TaskManagerCard({
       label,
       startDate,
       endDate,
+      assignee,
     };
 
     const result = editingTask
@@ -60,6 +74,7 @@ export default function TaskManagerCard({
       setStartDate("");
       setEndDate("");
       setLabel("");
+      setAssignee(defaultAssignee);
     }
   };
 
@@ -68,6 +83,7 @@ export default function TaskManagerCard({
     setStartDate("");
     setEndDate("");
     setLabel("");
+    setAssignee(defaultAssignee);
     setFormError("");
     onCancelEdit();
   };
@@ -198,7 +214,7 @@ export default function TaskManagerCard({
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "minmax(0, 1fr) auto auto",
+            gridTemplateColumns: "minmax(0, 1fr) minmax(0, 1fr)",
             gap: 8,
             alignItems: "center",
             width: "100%",
@@ -212,34 +228,31 @@ export default function TaskManagerCard({
             style={inputStyle}
           />
 
-          <button
-            type="button"
-            style={{
-              border: "1px solid var(--color-border-strong, #d1d5db)",
-              background: "var(--color-bg-card, #ffffff)",
-              borderRadius: "var(--radius-sm, 10px)",
-              padding: "10px 10px",
-              fontWeight: 700,
-              fontSize: 12,
-              cursor: "pointer",
-              whiteSpace: "nowrap",
-              flexShrink: 0,
-              color: "var(--color-text-soft, #374151)",
-            }}
+          <select
+            value={assignee}
+            onChange={(e) => setAssignee(e.target.value)}
+            style={inputStyle}
           >
-            候補
-          </button>
+            {safeUsers.length === 0 ? (
+              <option value="朝倉悠翔">朝倉悠翔</option>
+            ) : (
+              safeUsers.map((user) => (
+                <option key={user.id} value={user.name}>
+                  {user.name}（{user.roleLabel || "利用者"}）
+                </option>
+              ))
+            )}
+          </select>
+        </div>
 
-          <div
-            style={{
-              width: 22,
-              height: 22,
-              borderRadius: 6,
-              background: "var(--color-primary, #2563eb)",
-              border: "1px solid var(--color-border-strong, #d1d5db)",
-              flexShrink: 0,
-            }}
-          />
+        <div
+          style={{
+            fontSize: 12,
+            color: "var(--color-text-sub, #6b7280)",
+            marginTop: -2,
+          }}
+        >
+          担当者：{assignee || "未選択"}
         </div>
 
         <div
